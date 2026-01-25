@@ -276,7 +276,6 @@ for p in people:
 
 # Display as a scrollable text block
 st.text("\n".join(report_lines))
-
     # --------------------------------------------------------
     # CSV Export
     # --------------------------------------------------------
