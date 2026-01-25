@@ -231,6 +231,38 @@ if st.button("🚀 Generate Schedule", use_container_width=True):
     st.success("✅ Schedule generated with guaranteed leadership exposure")
 
     # --------------------------------------------------------
+    # TEXT REPORT: Overall Leadership Load Summary
+    # --------------------------------------------------------
+    leadership_totals = {}
+
+    for p in people:
+        total = 0
+        for t in shifts:
+            if pulp.value(x[p, t, "PL"]) > 0.5:
+                total += 1
+            if pulp.value(x[p, t, "PSG"]) > 0.5:
+                total += 1
+            sl_role = f"SL_{person_squad[p] + 1}"
+            if pulp.value(x[p, t, sl_role]) > 0.5:
+                total += 1
+        leadership_totals[p] = total
+
+    max_val = max(leadership_totals.values())
+    min_val = min(leadership_totals.values())
+    avg_val = sum(leadership_totals.values()) / len(leadership_totals)
+
+    max_people = [p for p, v in leadership_totals.items() if v == max_val]
+    min_people = [p for p, v in leadership_totals.items() if v == min_val]
+
+    st.markdown("### 📊 Overall Leadership Load (SL + PL + PSG)")
+    st.text(
+        f"Max SL+PL+PSG shifts: {max_val}  ({', '.join(max_people)})\n"
+        f"Min SL+PL+PSG shifts: {min_val}  ({', '.join(min_people)})\n"
+        f"Avg SL+PL+PSG shifts: {avg_val:.2f}"
+        )
+        
+
+    # --------------------------------------------------------
     # TEXT REPORT: Per-Soldier Leadership Summary
     # --------------------------------------------------------
     st.markdown("---")
