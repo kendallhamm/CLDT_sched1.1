@@ -97,7 +97,8 @@ Each shift requires **8 different soldiers**:
 - One Squad Leader from each of the 4 squads  
 
 Because soldiers normally cannot work back-to-back shifts, each soldier can work
-at most $$\( \lceil T / 2 \rceil \)$$ shifts.
+at most $ \lceil T / 2 \rceil $ shifts.
+
 
 $$
 P \cdot \left\lceil \frac{T}{2} \right\rceil \ge 8T
