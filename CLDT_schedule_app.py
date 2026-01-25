@@ -29,7 +29,7 @@ Generate a CLDT leadership schedule while preserving squad integrity.
 **Hard Rules**
 - One role per soldier per shift
 - No back-to-back shifts except sequencing
-- Max **2 platoon-level roles per squad per shift**
+- Max **2 platoon-level roles per squad per shift** to prevent hollowing out a squad beyond combat effectiveness.
 - Everyone serves as PL or PSG at least once
 - Everyone is graded at least once
 
