@@ -40,6 +40,8 @@ Each soldier is guaranteed:
 - Solver is optimizing to **minimize the difference between the most total shifts and the least**, or equitably distribute the workload across all soldiers.
 
 Squad integrity is preserved at all times.
+
+Use the toggles on the left of the screen to build your custom schedule. Then click **Generate Schedule** and scroll through the report to the option to download as a .CSV. 
 """)
 
 with st.expander("What's a lane vs a shift?"):
