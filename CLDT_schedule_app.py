@@ -274,15 +274,57 @@ with col1:
             st.dataframe(pd.DataFrame(summary), use_container_width=True)
 
             # CSV export
-            csv_buffer = io.StringIO()
-            pd.DataFrame(summary).to_csv(csv_buffer, index=False)
+           # ----------------------------
+# CSV EXPORT (Lane-Shift Grid)
+# ----------------------------
+st.markdown("---")
+st.header("📥 Export Schedule (Lane / Shift Grid)")
 
-            st.download_button(
-                "📥 Download Summary CSV",
-                csv_buffer.getvalue(),
-                "cldt_schedule.csv",
-                "text/csv"
-            )
+# Column labels
+shift_labels = []
+for ln in range(lanes):
+    for sf in range(lane_shifts[ln]):
+        shift_labels.append(f"L{ln+1}-S{sf+1}")
+
+# Build table
+csv_rows = []
+for p in people:
+    row = [p]
+    for ln in range(lanes):
+        for sf in range(lane_shifts[ln]):
+            t = offset[ln] + sf
+            cell = ""
+
+            # Find working role (at most one)
+            for r in roles_for_shift(t):
+                var = x.get((p, t, r))
+                if var is not None and pulp.value(var) > 0.5:
+                    cell = r
+                    # Graded SL tag
+                    if r.startswith("SL_") and pulp.value(g[(p, t)]) > 0.5:
+                        cell = f"{r}-G"
+                    break
+
+            row.append(cell)
+    csv_rows.append(row)
+
+df_csv = pd.DataFrame(
+    csv_rows,
+    columns=["Soldier"] + shift_labels
+)
+
+# Convert to CSV
+csv_buffer = io.StringIO()
+df_csv.to_csv(csv_buffer, index=False)
+
+st.download_button(
+    label="📊 Download Full Schedule CSV",
+    data=csv_buffer.getvalue(),
+    file_name="cldt_lane_shift_schedule.csv",
+    mime="text/csv",
+    use_container_width=True
+)
+
 
 st.markdown("---")
 st.caption("Built by K. Hamm with heavy assistance from ChatGPT 5.0")
