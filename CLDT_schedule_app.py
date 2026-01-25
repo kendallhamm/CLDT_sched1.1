@@ -22,8 +22,8 @@ Generate a CLDT leadership schedule that preserves squad integrity.
 **Hard Rules**
 - Each shift assigns: PL, PSG, RTO, MED, and one SL per squad
 - SLs are fixed to their own squads only
-- At most **2 soldiers per squad** may serve as PL/PSG/RTO/MED per shift
-- RTO → PL and MED → PSG sequencing is mandatory
+- At most **2 soldiers per squad** may serve as PL/PSG/RTO/MED per shift- this prevents 'hollowing out' of a squad
+- RTO → PL and MED → PSG sequencing is mandatory. The RTO becomes the next PL, the Medic becomes the next PSG.
 - One role per soldier per shift
 - No back-to-back shifts except sequencing
 - Everyone serves as PL or PSG at least once
@@ -32,7 +32,7 @@ Generate a CLDT leadership schedule that preserves squad integrity.
 **Objective**
 Balance total shifts as evenly as possible.
 
-*Built by K. Hamm with assistance from ChatGPT*
+*Built by K. Hamm with assistance from ChatGPT 5.0 and 5.2*
 """)
 
 # ----------------------------
