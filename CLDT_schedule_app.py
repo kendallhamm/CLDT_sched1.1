@@ -22,7 +22,7 @@ st.markdown("""
 # ----------------------------
 # Header
 # ----------------------------
-st.title("🎖️ CLDT Leadership Schedule Builder")
+st.title("CLDT Leadership Schedule Builder")
 
 st.info("""
 **Purpose:** Build a balanced CLDT leadership rotation by lane and shift.
