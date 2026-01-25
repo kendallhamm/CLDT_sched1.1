@@ -42,12 +42,14 @@ Squad integrity is preserved at all times.
 """)
 
 st.info("""
-FEASIBILITY RULES (BASED ON P AND T)
+FEASIBILITY RULES 
+There are a few combinations that mathematically present unsolvable schedules. 
+The key four are highlighted below. 
 
 Let:
-P = total number of soldiers
+P = total number of soldiers (PLT size)
 T = total number of shifts across all lanes
-nₛ = size of squad s
+nₛ = size of squad s (if 1st SQD has 7 soldiers, n₁ = 7)
 
 A schedule can be generated ONLY if all of the following conditions are met.
 1) P × ⌈T / 2⌉ ≥ 8 × T
@@ -55,7 +57,7 @@ A schedule can be generated ONLY if all of the following conditions are met.
 3) nₛ × ⌈T / 2⌉ ≥ T
 4) nₛ × ⌈T / 3⌉ ≥ T
 
-These conditions are more below if you are interested in the math behind them.
+These conditions are more detailed below if you are interested in the math behind them.
 """)
 with st.expander("Click here for Supporting Math for feasibility conditions"):
     st.markdown(r"""
