@@ -7,7 +7,7 @@ import math
 st.set_page_config(
     page_title="CLDT Leadership Schedule Builder",
     layout="wide",
-    page_icon="🎖️"
+    page_icon=""
 )
 
 # ----------------------------
