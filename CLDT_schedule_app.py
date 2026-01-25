@@ -41,6 +41,173 @@ Each soldier is guaranteed:
 Squad integrity is preserved at all times.
 """)
 
+st.info("""
+FEASIBILITY RULES (BASED ON P AND T)
+
+Let:
+P = total number of soldiers
+T = total number of shifts across all lanes
+nₛ = size of squad s
+
+A schedule can be generated ONLY if all of the following conditions are met.
+1) P × ⌈T / 2⌉ ≥ 8 × T
+2) 2 × T ≥ P
+3) nₛ × ⌈T / 2⌉ ≥ T
+4) nₛ × ⌈T / 3⌉ ≥ T
+
+These conditions are more below if you are interested in the math behind them.
+""")
+with st.expander("Click here for Supporting Math for feasibility conditions"):
+    st.markdown(r"""
+    ### Formal Feasibility Conditions
+
+Let:
+- \( P \) = total number of soldiers  
+- \( T \) = total number of shifts  
+- \( n_s \) = size of squad \( s \)
+
+---
+
+#### 1. Global manpower capacity
+\[
+P \cdot \left\lceil \frac{T}{2} \right\rceil \ge 8T
+\]
+
+---
+
+#### 2. Leadership exposure capacity
+\[
+2T \ge P
+\]
+
+---
+
+#### 3. Squad-locked SL coverage
+\[
+n_s \cdot \left\lceil \frac{T}{2} \right\rceil \ge T
+\quad \forall s
+\]
+
+---
+
+#### 4. Sequencing-induced workload
+\[
+n_s \cdot \left\lceil \frac{T}{3} \right\rceil \ge T
+\quad \forall s
+\]
+
+---
+
+#### 5. Squad integrity (platoon-level pull cap)
+\[
+\sum_{p \in s}
+\big(
+x_{p,t,\text{PL}} +
+x_{p,t,\text{PSG}} +
+x_{p,t,\text{RTO}} +
+x_{p,t,\text{MED}}
+\big)
+\le 2
+\quad \forall s,t
+\]
+
+---
+
+#### 6. Optimization objective (not feasibility)
+\[
+\min \left( \max_p S_p - \min_p S_p \right)
+\]
+""")
+#--------------------------------------------------
+#1) GLOBAL MANPOWER CAPACITY
+#--------------------------------------------------
+#Each shift requires 8 different soldiers:
+#• PL, PSG, RTO, MED
+#• One Squad Leader from each of the 4 squads
+
+#Because soldiers normally cannot work back-to-back shifts, each soldier can work
+#at most ⌈T / 2⌉ shifts.
+
+# Required condition:
+# P × ⌈T / 2⌉ ≥ 8 × T
+
+# If this fails, there are not enough soldiers to staff all shifts.
+
+# --------------------------------------------------
+# 2) LEADERSHIP EXPOSURE REQUIREMENTS
+# --------------------------------------------------
+# Every soldier must:
+# • Serve at least once as PL or PSG
+# • Serve at least once as a graded Squad Leader
+
+# Each shift provides:
+# • 2 PL/PSG slots
+# • 2 graded SL slots
+
+# Required condition:
+# 2 × T ≥ P
+
+# If this fails, there are not enough leadership opportunities for everyone.
+
+# --------------------------------------------------
+# 3) SQUAD-LOCKED SL CAPACITY
+# --------------------------------------------------
+# Each squad must provide exactly one Squad Leader every shift.
+# SLs are locked to their own squad.
+
+# For each squad s:
+# nₛ × ⌈T / 2⌉ ≥ T
+
+# If any squad fails this, it cannot sustain SL coverage across all shifts.
+
+# --------------------------------------------------
+# 4) SEQUENCING-INDUCED WORKLOAD (CRITICAL)
+# --------------------------------------------------
+# RTO and MED roles are paired with leadership roles on the next shift:
+# • RTO(t) → PL(t+1)
+# • MED(t) → PSG(t+1)
+
+# This pairing consumes two adjacent shifts for the same soldier and significantly
+# reduces flexibility.
+
+# To absorb this sequencing load in addition to SL duties, each squad must satisfy:
+# nₛ × ⌈T / 3⌉ ≥ T
+
+# If this fails, sequencing forces overloads and no valid schedule exists.
+
+# --------------------------------------------------
+# 5) SQUAD INTEGRITY (PLATOON-LEVEL PULL LIMIT)
+# --------------------------------------------------
+# To preserve unit integrity:
+# • No more than 2 soldiers per squad per shift may serve as
+#   PL, PSG, RTO, or MED.
+
+# If squad sizes are too small relative to T, this limit prevents platoon roles
+# from being filled legally.
+
+# (This constraint is enforced implicitly by Conditions 3 and 4.)
+
+# --------------------------------------------------
+# 6) FAIRNESS EXPECTATION
+# --------------------------------------------------
+# The solver minimizes the difference between the most-worked and least-worked soldiers.
+
+# Because of:
+# • squad locking,
+# • sequencing,
+# • rest rules,
+# • and exposure requirements, perfect equality (everyone working exactly the same number of leadership shifts)
+# is often mathematically impossible.
+
+# The solver returns the fairest possible solution, not necessarily a perfectly
+# even one.
+
+
+
+# """)
+
+
+
 # ------------------------------------------------------------
 # Sidebar Inputs
 # ------------------------------------------------------------
