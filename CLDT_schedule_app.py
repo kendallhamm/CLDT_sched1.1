@@ -42,6 +42,14 @@ Each soldier is guaranteed:
 Squad integrity is preserved at all times.
 """)
 
+st.expander("What's a lane vs a shift?")
+    st.markdown(r"""
+Definitions:
+Lane: A lane is generally going to be a 24-36 hour period, sometimes less sometimes more.
+Shift: Most lanes will have multiple shifts. Generally these break into a patrol base shift, a planning shift, and an actions on objective shift.
+""")
+
+
 st.info("""
 FEASIBILITY RULES 
 
