@@ -261,6 +261,7 @@ if st.button("🚀 Generate Schedule", use_container_width=True):
 
         report_lines.append(
             f"{p}:\n"
+            f"  Total SL(graded & ungraded), PL, PSG shifts: {sl_graded+sl_ungraded+pl_count+psg_count}\n"
             f"  Total SL shifts: {sl_total}\n"
             f"  Total PL & PSG shifts: {pl_count + psg_count}\n"
             f"  ├─ PL shifts: {pl_count}\n"
