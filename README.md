@@ -8,8 +8,6 @@ A web-based application for generating optimal leadership rotation schedules for
 - **Flexible Configuration**: 
   - Variable squad sizes (6-9 soldiers per squad)
   - Adjustable lane and shift counts
-  - Optional RTO/MED training pairings
-  - Team leader assignment options
 - **Fair Distribution**: Ensures balanced workload across all soldiers
 - **Professional Output**: Clean schedule display and CSV export
 
@@ -48,9 +46,7 @@ A web-based application for generating optimal leadership rotation schedules for
    - Option for variable shifts per lane
 
 3. **Training Options** (Sidebar)
-   - **RTO→PL/MED→PSG Pairing**: Automatically assign RTO to become PL on next shift (and MED to PSG)
-   - **Volunteer Mode**: Leave RTO/MED unassigned for daily volunteers
-   - **Team Leaders**: Choose 0, 1, or 2 team leaders per squad
+   - Maybe more features coming!
 
 4. **Generate Schedule**
    - Click "Generate Schedule" button
@@ -60,19 +56,7 @@ A web-based application for generating optimal leadership rotation schedules for
 
 The app provides:
 
-1. **Schedule Display**: 
-   - Organized by lane and shift
-   - Shows all leadership positions (PL, PSG, SLs, RTO, MED)
-   - Displays team leader assignments
-   - Indicates graded squad leaders
-
-2. **Per-Soldier Summary**:
-   - Total shifts per soldier
-   - Breakdown by role type
-   - Grading counts
-   - Team leader assignments
-
-3. **CSV Export**:
+1. **CSV Export**:
    - Download button for full schedule
    - Rows = soldiers
    - Columns = shifts (formatted as L#-S#)
@@ -86,15 +70,13 @@ The app provides:
 - **SL**: Squad Leader
 - **RTO**: Radio Transmission Operator
 - **MED**: Medic
-- **ATL**: Alpha Team Leader
-- **BTL**: Bravo Team Leader
 - **-G**: Graded (appended to SL roles)
 
 ### Constraints Applied
 - Every soldier gets at least one PL or PSG assignment
 - Every soldier gets at least one graded SL assignment
 - Exactly 2 squad leaders are graded per shift
-- No back-to-back shifts (except when training pairings are enforced)
+- No back-to-back shifts (except RTO->PL and MED->PSG)
 - Fair distribution of all roles within squads
 - Per-squad caps enforced for working positions
 
@@ -127,10 +109,10 @@ pip install -r requirements.txt --no-cache-dir
 
 ## Credits
 
-Built by K. Hamm with heavy assistance from ChatGPT 5.0
+Built by K. Hamm with heavy assistance from ChatGPT 5.0 and 5.2
 
 Questions/Comments/Feedback - reach out to K. Hamm
 
 ## License
 
-This tool is provided for military training purposes. Use at your own discretion.
+This tool is provided for military training purposes. Use at your own discretion. 
