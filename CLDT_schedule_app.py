@@ -144,7 +144,6 @@ if st.button("🚀 Generate Schedule", use_container_width=True):
     g = {(p, t): pulp.LpVariable(f"g_{p}_{t}", 0, 1, cat="Binary")
          for p in people for t in shifts}
 
-    # Exposure variables (CRITICAL)
     e_pl = {p: pulp.LpVariable(f"exposed_pl_{p}", 0, 1, cat="Binary") for p in people}
     e_g  = {p: pulp.LpVariable(f"exposed_g_{p}", 0, 1, cat="Binary") for p in people}
 
@@ -203,20 +202,16 @@ if st.button("🚀 Generate Schedule", use_container_width=True):
             model += g[p, t] <= x[p, t, role_SL[person_squad[p]]]
 
     # --------------------------------------------------------
-    # Exposure constraints (THE FIX)
+    # Exposure constraints
     # --------------------------------------------------------
     for p in people:
-        # PL / PSG exposure
         model += pulp.lpSum(
             x[p, t, role_PL] + x[p, t, role_PSG]
             for t in shifts
         ) >= e_pl[p]
         model += e_pl[p] == 1
 
-        # Graded SL exposure
-        model += pulp.lpSum(
-            g[p, t] for t in shifts
-        ) >= e_g[p]
+        model += pulp.lpSum(g[p, t] for t in shifts) >= e_g[p]
         model += e_g[p] == 1
 
     # --------------------------------------------------------
@@ -233,6 +228,7 @@ if st.button("🚀 Generate Schedule", use_container_width=True):
     model.solve(solver)
 
     st.success("✅ Schedule generated with guaranteed leadership exposure")
+
     # --------------------------------------------------------
     # TEXT REPORT: Per-Soldier Leadership Summary
     # --------------------------------------------------------
@@ -248,34 +244,32 @@ if st.button("🚀 Generate Schedule", use_container_width=True):
         pl_count = 0
         psg_count = 0
 
-    for t in shifts:
-        # PL / PSG
-        if pulp.value(x[p, t, "PL"]) > 0.5:
-            pl_count += 1
-        if pulp.value(x[p, t, "PSG"]) > 0.5:
-            psg_count += 1
+        for t in shifts:
+            if pulp.value(x[p, t, "PL"]) > 0.5:
+                pl_count += 1
+            if pulp.value(x[p, t, "PSG"]) > 0.5:
+                psg_count += 1
 
-        # SL (squad-locked)
-        sl_role = f"SL_{person_squad[p] + 1}"
-        if pulp.value(x[p, t, sl_role]) > 0.5:
-            sl_total += 1
-            if pulp.value(g[p, t]) > 0.5:
-                sl_graded += 1
-            else:
-                sl_ungraded += 1
+            sl_role = f"SL_{person_squad[p] + 1}"
+            if pulp.value(x[p, t, sl_role]) > 0.5:
+                sl_total += 1
+                if pulp.value(g[p, t]) > 0.5:
+                    sl_graded += 1
+                else:
+                    sl_ungraded += 1
 
-    report_lines.append(
-        f"{p}:\n"
-        f"  Total SL shifts: {sl_total}\n"
-        f"  Total PL & PSG shifts: {pl_count + psg_count}\n"
-        f"  ├─ PL shifts: {pl_count}\n"
-        f"  ├─ PSG shifts: {psg_count}\n"
-        f"  Total Graded SL shifts: {sl_graded}\n"
-        f"  Total Ungraded SL shifts: {sl_ungraded}\n"
-    )
+        report_lines.append(
+            f"{p}:\n"
+            f"  Total SL shifts: {sl_total}\n"
+            f"  Total PL & PSG shifts: {pl_count + psg_count}\n"
+            f"  ├─ PL shifts: {pl_count}\n"
+            f"  ├─ PSG shifts: {psg_count}\n"
+            f"  Total Graded SL shifts: {sl_graded}\n"
+            f"  Total Ungraded SL shifts: {sl_ungraded}\n"
+        )
 
-# Display as a scrollable text block
-st.text("\n".join(report_lines))
+    st.text("\n".join(report_lines))
+
     # --------------------------------------------------------
     # CSV Export
     # --------------------------------------------------------
