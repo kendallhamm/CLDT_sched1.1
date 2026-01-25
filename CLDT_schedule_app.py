@@ -7,13 +7,13 @@ import math
 st.set_page_config(
     page_title="CLDT Leadership Schedule Builder",
     layout="wide",
-    page_icon="🎖️"
+    page_icon="🫡"
 )
 
 # ----------------------------
 # Header
 # ----------------------------
-st.title("🎖️ CLDT Leadership Schedule Builder")
+st.title("🫡 CLDT Leadership Schedule Builder")
 
 st.info("""
 **Purpose**
