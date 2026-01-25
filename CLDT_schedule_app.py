@@ -42,7 +42,7 @@ Each soldier is guaranteed:
 Squad integrity is preserved at all times.
 """)
 
-st.expander("What's a lane vs a shift?")
+with st.expander("What's a lane vs a shift?")
     st.markdown(r"""
 Definitions:
 Lane: A lane is generally going to be a 24-36 hour period, sometimes less sometimes more.
