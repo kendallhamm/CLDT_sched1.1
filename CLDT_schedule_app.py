@@ -7,41 +7,30 @@ import math
 st.set_page_config(
     page_title="CLDT Leadership Schedule Builder",
     layout="wide",
-    page_icon=""
+    page_icon="🎖️"
 )
-
-# ----------------------------
-# Styling
-# ----------------------------
-st.markdown("""
-<style>
-.stAlert { padding: 1rem; }
-</style>
-""", unsafe_allow_html=True)
 
 # ----------------------------
 # Header
 # ----------------------------
-st.title("CLDT Leadership Schedule Builder")
+st.title("🎖️ CLDT Leadership Schedule Builder")
 
 st.info("""
-**Purpose:** Build a balanced CLDT leadership rotation by lane and shift.
-
-**Roles Assigned Per Shift**
-- PL, PSG
-- 1 SL per squad
-- RTO (precedes PL)
-- MED (precedes PSG)
-- Exactly 2 SLs graded
+**Purpose**
+Generate a CLDT leadership schedule that preserves squad integrity.
 
 **Hard Rules**
+- Each shift assigns: PL, PSG, RTO, MED, and one SL per squad
+- SLs are fixed to their own squads only
+- At most **2 soldiers per squad** may serve as PL/PSG/RTO/MED per shift
+- RTO → PL and MED → PSG sequencing is mandatory
 - One role per soldier per shift
-- No back-to-back shifts (except RTO→PL, MED→PSG)
+- No back-to-back shifts except sequencing
 - Everyone serves as PL or PSG at least once
-- Everyone is graded at least once
+- Exactly 2 SLs graded per shift
 
 **Objective**
-Minimize the difference in total shifts worked.
+Balance total shifts as evenly as possible.
 
 *Built by K. Hamm with assistance from ChatGPT*
 """)
@@ -52,16 +41,17 @@ Minimize the difference in total shifts worked.
 st.sidebar.header("📋 Exercise Configuration")
 
 st.sidebar.subheader("Squad Composition")
-n1 = st.sidebar.number_input("Squad 1 size", 6, 9, 8)
-n2 = st.sidebar.number_input("Squad 2 size", 6, 9, 8)
-n3 = st.sidebar.number_input("Squad 3 size", 6, 9, 8)
-n4 = st.sidebar.number_input("Squad 4 size", 6, 9, 8)
-SQUAD_SIZES = [n1, n2, n3, n4]
+SQUAD_SIZES = [
+    st.sidebar.number_input("Squad 1 size", 6, 9, 8),
+    st.sidebar.number_input("Squad 2 size", 6, 9, 8),
+    st.sidebar.number_input("Squad 3 size", 6, 9, 8),
+    st.sidebar.number_input("Squad 4 size", 6, 9, 8),
+]
 
 st.sidebar.subheader("Exercise Design")
 lanes = st.sidebar.number_input("Number of lanes", 6, 12, 6)
 
-same_shifts = st.sidebar.checkbox("All lanes have same number of shifts", True)
+same_shifts = st.sidebar.checkbox("All lanes same number of shifts", True)
 if same_shifts:
     SHIFTS_PER_LANE = st.sidebar.number_input("Shifts per lane", 1, 3, 2)
     lane_shifts = [SHIFTS_PER_LANE] * lanes
@@ -76,42 +66,29 @@ else:
 # ----------------------------
 P = sum(SQUAD_SIZES)
 T = sum(lane_shifts)
+R = 8  # PL, PSG, RTO, MED + 4 SLs
+max_shifts_per_person = math.ceil(T / 2)
 
 col1, col2 = st.columns([2, 1])
 with col2:
     st.metric("Total Soldiers", P)
-    st.metric("Total Lanes", lanes)
     st.metric("Total Shifts", T)
     st.write("Squad sizes:", SQUAD_SIZES)
 
 # ----------------------------
 # Feasibility Checks
 # ----------------------------
-R = 8  # PL, PSG, 4x SL, RTO, MED
-max_shifts_per_person = math.ceil(T / 2)
-
-feasibility_errors = []
+errors = []
 
 if P * max_shifts_per_person < R * T:
-    feasibility_errors.append(
-        "Not enough people to cover all required roles given rest constraints."
-    )
-
-if P < 2 * R:
-    feasibility_errors.append(
-        "Too few soldiers overall. Minimum required is 16."
-    )
+    errors.append("Not enough personnel to cover all roles with rest constraints.")
 
 if 2 * T < P:
-    feasibility_errors.append(
-        "Too many soldiers for the number of shifts. Not enough PL/PSG and grading slots."
-    )
+    errors.append("Too many soldiers for available PL/PSG and grading slots.")
 
-for idx, n in enumerate(SQUAD_SIZES, start=1):
+for i, n in enumerate(SQUAD_SIZES, start=1):
     if n * max_shifts_per_person < T:
-        feasibility_errors.append(
-            f"Squad {idx} is too small to provide one SL per shift."
-        )
+        errors.append(f"Squad {i} too small to supply an SL every shift.")
 
 # ----------------------------
 # Main Button
@@ -119,10 +96,10 @@ for idx, n in enumerate(SQUAD_SIZES, start=1):
 with col1:
     if st.button("🚀 Generate Schedule", use_container_width=True):
 
-        if feasibility_errors:
-            st.error("🚫 This configuration is infeasible:")
-            for err in feasibility_errors:
-                st.write(f"- {err}")
+        if errors:
+            st.error("🚫 Infeasible configuration:")
+            for e in errors:
+                st.write(f"- {e}")
             st.stop()
 
         with st.spinner("Solving optimization model..."):
@@ -146,7 +123,7 @@ with col1:
                     person_squad[pid] = s_idx
 
             shifts = list(range(T))
-            S = len(SQUAD_SIZES)
+            S = 4
 
             # ----------------------------
             # Roles
@@ -155,9 +132,10 @@ with col1:
             role_PSG = "PSG"
             role_RTO = "RTO"
             role_MED = "MED"
-            role_SL = [f"SL_{s+1}" for s in range(S)]
+            role_SL = [f"SL_{i+1}" for i in range(S)]
 
-            all_roles = [role_PL, role_PSG, role_RTO, role_MED] + role_SL
+            platoon_roles = [role_PL, role_PSG, role_RTO, role_MED]
+            all_roles = platoon_roles + role_SL
 
             # ----------------------------
             # Model
@@ -177,7 +155,7 @@ with col1:
             zmin = pulp.LpVariable("zmin", lowBound=0, cat="Integer")
 
             # ----------------------------
-            # Coverage
+            # Coverage constraints
             # ----------------------------
             for t in shifts:
                 model += pulp.lpSum(x[p, t, role_PL] for p in people) == 1
@@ -197,7 +175,17 @@ with col1:
             for p in people:
                 for t in shifts:
                     model += pulp.lpSum(x[p, t, r] for r in all_roles) == y[p, t]
-                    model += y[p, t] <= 1
+
+            # ----------------------------
+            # Squad integrity (max 2 pulled)
+            # ----------------------------
+            for t in shifts:
+                for s_idx in range(S):
+                    model += pulp.lpSum(
+                        x[p, t, r]
+                        for p in people if person_squad[p] == s_idx
+                        for r in platoon_roles
+                    ) <= 2
 
             # ----------------------------
             # Leadership exposure
@@ -230,7 +218,7 @@ with col1:
                     model += g[p, t] <= x[p, t, role_SL[s_idx]]
 
             # ----------------------------
-            # Fairness
+            # Fairness objective
             # ----------------------------
             for p in people:
                 Sp = pulp.lpSum(y[p, t] for t in shifts)
@@ -276,19 +264,16 @@ with col1:
                 rows.append(row)
 
             df = pd.DataFrame(rows, columns=["Soldier"] + shift_labels)
-            buffer = io.StringIO()
-            df.to_csv(buffer, index=False)
+            buf = io.StringIO()
+            df.to_csv(buf, index=False)
 
             st.download_button(
                 "📊 Download Full Schedule CSV",
-                buffer.getvalue(),
+                buf.getvalue(),
                 "cldt_lane_shift_schedule.csv",
                 "text/csv",
                 use_container_width=True
             )
 
-# ----------------------------
-# Footer
-# ----------------------------
 st.markdown("---")
 st.caption("Built by K. Hamm with assistance from ChatGPT")
