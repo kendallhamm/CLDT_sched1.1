@@ -17,22 +17,26 @@ st.title("🫡 CLDT Leadership Schedule Builder")
 
 st.info("""
 **Purpose**
-Generate a CLDT leadership schedule that preserves squad integrity.
+Generate a CLDT leadership schedule that preserves squad integrity and enforces doctrinal sequencing.
 
-**Hard Rules**
-- Each shift assigns: PL, PSG, RTO, MED, and one SL per squad
-- SLs are fixed to their own squads only
-- At most **2 soldiers per squad** may serve as PL/PSG/RTO/MED per shift- this prevents 'hollowing out' of a squad
-- RTO → PL and MED → PSG sequencing is mandatory. The RTO becomes the next PL, the Medic becomes the next PSG.
+**Roles per Shift**
+- PL, PSG
+- RTO → PL (next shift)
+- MED → PSG (next shift)
+- 1 Squad Leader per squad (squad-locked)
+- Exactly 2 SLs graded per shift
+
+**Hard Structural Rules**
 - One role per soldier per shift
 - No back-to-back shifts except sequencing
+- At most **2 platoon-level roles per squad per shift**
 - Everyone serves as PL or PSG at least once
-- Exactly 2 SLs graded per shift
+- Everyone is graded at least once
 
 **Objective**
 Balance total shifts as evenly as possible.
 
-*Built by K. Hamm with assistance from ChatGPT 5.0 and 5.2*
+*Built by K. Hamm with assistance from ChatGPT*
 """)
 
 # ----------------------------
@@ -62,11 +66,12 @@ else:
     ]
 
 # ----------------------------
-# Summary
+# Summary + Derived Values
 # ----------------------------
 P = sum(SQUAD_SIZES)
 T = sum(lane_shifts)
 R = 8  # PL, PSG, RTO, MED + 4 SLs
+
 max_shifts_per_person = math.ceil(T / 2)
 
 col1, col2 = st.columns([2, 1])
@@ -76,19 +81,36 @@ with col2:
     st.write("Squad sizes:", SQUAD_SIZES)
 
 # ----------------------------
-# Feasibility Checks
+# Pre-solve Feasibility Checks
 # ----------------------------
 errors = []
 
+# Global labor capacity
 if P * max_shifts_per_person < R * T:
-    errors.append("Not enough personnel to cover all roles with rest constraints.")
+    errors.append(
+        "Not enough total personnel to cover all required roles with rest constraints."
+    )
 
+# PL/PSG + grading coverage
 if 2 * T < P:
-    errors.append("Too many soldiers for available PL/PSG and grading slots.")
+    errors.append(
+        "Too many soldiers for available PL/PSG and grading slots."
+    )
 
+# SL supply per squad
 for i, n in enumerate(SQUAD_SIZES, start=1):
     if n * max_shifts_per_person < T:
-        errors.append(f"Squad {i} too small to supply an SL every shift.")
+        errors.append(
+            f"Squad {i} is too small to provide an SL every shift."
+        )
+
+# 🔥 NEW: sequencing-saturated squad capacity
+for i, n in enumerate(SQUAD_SIZES, start=1):
+    if n * math.ceil(T / 3) < T:
+        errors.append(
+            f"Squad {i} cannot sustain SL + platoon-role sequencing load "
+            f"(sequencing bottleneck)."
+        )
 
 # ----------------------------
 # Main Button
@@ -97,7 +119,7 @@ with col1:
     if st.button("🚀 Generate Schedule", use_container_width=True):
 
         if errors:
-            st.error("🚫 Infeasible configuration:")
+            st.error("🚫 This configuration is mathematically infeasible:")
             for e in errors:
                 st.write(f"- {e}")
             st.stop()
@@ -177,7 +199,7 @@ with col1:
                     model += pulp.lpSum(x[p, t, r] for r in all_roles) == y[p, t]
 
             # ----------------------------
-            # Squad integrity (max 2 pulled)
+            # Squad integrity (max 2 platoon roles)
             # ----------------------------
             for t in shifts:
                 for s_idx in range(S):
@@ -197,7 +219,7 @@ with col1:
                 ) >= 1
 
             # ----------------------------
-            # RTO → PL, MED → PSG sequencing
+            # Sequencing + rest
             # ----------------------------
             for p in people:
                 for t in range(T - 1):
