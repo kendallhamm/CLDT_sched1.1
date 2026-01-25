@@ -61,48 +61,96 @@ A schedule can be generated ONLY if all of the following conditions are met.
 
 These conditions are more detailed below if you are interested in the math behind them.
 """)
-with st.expander("Click here for Supporting Math for feasibility conditions"):
+with st.expander("Click here for Supporting Math for Feasibility Conditions"):
     st.markdown(r"""
-### Formal Feasibility Conditions
+### Feasibility Rules (Based on P and T)
 
 Let:
 - \( P \) = total number of soldiers  
-- \( T \) = total number of shifts  
+- \( T \) = total number of shifts across all lanes  
 - \( n_s \) = size of squad \( s \)
+
+A schedule can be generated **only if all of the following conditions are met**.
 
 ---
 
-#### 1. Global manpower capacity
+#### 1️⃣ Global Manpower Capacity
+
+Each shift requires **8 different soldiers**:
+- PL, PSG, RTO, MED  
+- One Squad Leader from each of the 4 squads  
+
+Because soldiers normally cannot work back-to-back shifts, each soldier can work
+at most \( \lceil T / 2 \rceil \) shifts.
+
 $$
 P \cdot \left\lceil \frac{T}{2} \right\rceil \ge 8T
 $$
 
+If this condition fails, there are not enough soldiers to staff all shifts.
+
 ---
 
-#### 2. Leadership exposure capacity
+#### 2️⃣ Leadership Exposure Requirements
+
+Every soldier must:
+- Serve **at least once** as PL or PSG  
+- Serve **at least once** as a graded Squad Leader  
+
+Each shift provides:
+- 2 PL/PSG slots  
+- 2 graded SL slots  
+
 $$
 2T \ge P
 $$
 
+If this condition fails, there are not enough leadership opportunities for everyone.
+
 ---
 
-#### 3. Squad-locked SL coverage
+#### 3️⃣ Squad-Locked SL Capacity
+
+Each squad must provide **exactly one Squad Leader every shift**.
+Squad Leaders are locked to their own squad.
+
+For each squad \( s \):
+
 $$
 n_s \cdot \left\lceil \frac{T}{2} \right\rceil \ge T
 \quad \forall s
 $$
 
+If any squad fails this condition, it cannot sustain SL coverage across all shifts.
+
 ---
 
-#### 4. Sequencing-induced workload
+#### 4️⃣ Sequencing-Induced Workload (Critical)
+
+RTO and MED roles are paired with leadership roles on the next shift:
+- RTO\(t\) → PL\(t+1\)  
+- MED\(t\) → PSG\(t+1\)  
+
+This pairing consumes **two adjacent shifts** for the same soldier and significantly
+reduces flexibility.
+
+To absorb this sequencing load **in addition to SL duties**, each squad must satisfy:
+
 $$
 n_s \cdot \left\lceil \frac{T}{3} \right\rceil \ge T
 \quad \forall s
 $$
 
+If this condition fails, sequencing forces overloads and no valid schedule exists.
+
 ---
 
-#### 5. Squad integrity (platoon-level pull cap)
+#### 5️⃣ Squad Integrity (Platoon-Level Pull Limit)
+
+To preserve unit integrity:
+- **No more than 2 soldiers per squad per shift** may serve as  
+  PL, PSG, RTO, or MED.
+
 $$
 \sum_{p \in s}
 \big(
@@ -115,13 +163,34 @@ x_{p,t,\text{MED}}
 \quad \forall s,t
 $$
 
+If squad sizes are too small relative to \( T \), this limit prevents platoon-level
+roles from being filled legally.
+
+(This constraint is enforced implicitly by Conditions 3 and 4.)
+
 ---
 
-#### 6. Optimization objective (not feasibility)
+#### 6️⃣ Fairness Expectation (Optimization Objective)
+
+The solver minimizes the difference between the **most-worked** and **least-worked**
+soldiers.
+
+Because of:
+- squad locking  
+- sequencing  
+- rest rules  
+- exposure requirements  
+
+perfect equality is often mathematically impossible.
+
 $$
 \min \left( \max_p S_p - \min_p S_p \right)
 $$
+
+The solver returns the **fairest possible solution**, not necessarily a perfectly
+even one.
 """)
+
 
 
 # ------------------------------------------------------------
