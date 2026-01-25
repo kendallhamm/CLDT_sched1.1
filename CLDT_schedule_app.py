@@ -233,6 +233,49 @@ if st.button("🚀 Generate Schedule", use_container_width=True):
     model.solve(solver)
 
     st.success("✅ Schedule generated with guaranteed leadership exposure")
+# --------------------------------------------------------
+# TEXT REPORT: Per-Soldier Leadership Summary
+# --------------------------------------------------------
+st.markdown("---")
+st.header("🧾 Per-Soldier Leadership Summary")
+
+report_lines = []
+
+for p in people:
+    sl_total = 0
+    sl_graded = 0
+    sl_ungraded = 0
+    pl_count = 0
+    psg_count = 0
+
+    for t in shifts:
+        # PL / PSG
+        if pulp.value(x[p, t, "PL"]) > 0.5:
+            pl_count += 1
+        if pulp.value(x[p, t, "PSG"]) > 0.5:
+            psg_count += 1
+
+        # SL (squad-locked)
+        sl_role = f"SL_{person_squad[p] + 1}"
+        if pulp.value(x[p, t, sl_role]) > 0.5:
+            sl_total += 1
+            if pulp.value(g[p, t]) > 0.5:
+                sl_graded += 1
+            else:
+                sl_ungraded += 1
+
+    report_lines.append(
+        f"{p}:\n"
+        f"  Total SL shifts: {sl_total}\n"
+        f"  Total PL & PSG shifts: {pl_count + psg_count}\n"
+        f"  ├─ PL shifts: {pl_count}\n"
+        f"  ├─ PSG shifts: {psg_count}\n"
+        f"  Total Graded SL shifts: {sl_graded}\n"
+        f"  Total Ungraded SL shifts: {sl_ungraded}\n"
+    )
+
+# Display as a scrollable text block
+st.text("\n".join(report_lines))
 
     # --------------------------------------------------------
     # CSV Export
