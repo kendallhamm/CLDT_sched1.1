@@ -59,7 +59,7 @@ These conditions are more below if you are interested in the math behind them.
 """)
 with st.expander("Click here for Supporting Math for feasibility conditions"):
     st.markdown(r"""
-    ### Formal Feasibility Conditions
+### Formal Feasibility Conditions
 
 Let:
 - \( P \) = total number of soldiers  
@@ -69,37 +69,37 @@ Let:
 ---
 
 #### 1. Global manpower capacity
-\[
+$$
 P \cdot \left\lceil \frac{T}{2} \right\rceil \ge 8T
-\]
+$$
 
 ---
 
 #### 2. Leadership exposure capacity
-\[
+$$
 2T \ge P
-\]
+$$
 
 ---
 
 #### 3. Squad-locked SL coverage
-\[
+$$
 n_s \cdot \left\lceil \frac{T}{2} \right\rceil \ge T
 \quad \forall s
-\]
+$$
 
 ---
 
 #### 4. Sequencing-induced workload
-\[
+$$
 n_s \cdot \left\lceil \frac{T}{3} \right\rceil \ge T
 \quad \forall s
-\]
+$$
 
 ---
 
 #### 5. Squad integrity (platoon-level pull cap)
-\[
+$$
 \sum_{p \in s}
 \big(
 x_{p,t,\text{PL}} +
@@ -109,15 +109,16 @@ x_{p,t,\text{MED}}
 \big)
 \le 2
 \quad \forall s,t
-\]
+$$
 
 ---
 
 #### 6. Optimization objective (not feasibility)
-\[
+$$
 \min \left( \max_p S_p - \min_p S_p \right)
-\]
+$$
 """)
+
 #--------------------------------------------------
 #1) GLOBAL MANPOWER CAPACITY
 #--------------------------------------------------
