@@ -233,20 +233,20 @@ if st.button("🚀 Generate Schedule", use_container_width=True):
     model.solve(solver)
 
     st.success("✅ Schedule generated with guaranteed leadership exposure")
-# --------------------------------------------------------
-# TEXT REPORT: Per-Soldier Leadership Summary
-# --------------------------------------------------------
-st.markdown("---")
-st.header("🧾 Per-Soldier Leadership Summary")
+    # --------------------------------------------------------
+    # TEXT REPORT: Per-Soldier Leadership Summary
+    # --------------------------------------------------------
+    st.markdown("---")
+    st.header("🧾 Per-Soldier Leadership Summary")
 
-report_lines = []
+    report_lines = []
 
-for p in people:
-    sl_total = 0
-    sl_graded = 0
-    sl_ungraded = 0
-    pl_count = 0
-    psg_count = 0
+    for p in people:
+        sl_total = 0
+        sl_graded = 0
+        sl_ungraded = 0
+        pl_count = 0
+        psg_count = 0
 
     for t in shifts:
         # PL / PSG
