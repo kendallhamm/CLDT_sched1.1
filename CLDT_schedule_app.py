@@ -31,7 +31,7 @@ st.set_page_config(
 st.title("🫡 CLDT Leadership Schedule Builder")
 
 st.info("""
-This tool builds a **doctrinally strict CLDT leadership schedule**.
+This tool builds a **CLDT leadership schedule**.
 
 Each soldier is guaranteed:
 - **At least one graded Squad Leader shift**
@@ -43,6 +43,7 @@ Squad integrity is preserved at all times.
 
 st.info("""
 FEASIBILITY RULES 
+
 There are a few combinations that mathematically present unsolvable schedules. 
 The key four are highlighted below. 
 
