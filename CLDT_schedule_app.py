@@ -36,6 +36,7 @@ This tool builds a **CLDT leadership schedule**.
 Each soldier is guaranteed:
 - **At least one graded Squad Leader shift**
 - **At least one PL or PSG shift**
+- RTO & MED will become the next shift's PL & PSG, respectively.
 - Solver is optimizing to **minimize the difference between the most total shifts and the least**, or equitably distribute the workload across all soldiers.
 
 Squad integrity is preserved at all times.
