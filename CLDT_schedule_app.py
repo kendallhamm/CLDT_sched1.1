@@ -34,8 +34,8 @@ st.info("""
 This tool builds a **CLDT leadership schedule** for a single PLT.
 
 This model assumes:
-- Each shift includes 1 graded PL, 1 graded PSG, 2 graded SLs, 2 ungraded SLs, 1 ungraded RTO, and 1 ungraded Medic.
-- No back to back shifts, except RTO/MED-> PSG
+- Each shift (also known as a 'look') includes 1 graded PL, 1 graded PSG, 2 graded SLs, 2 ungraded SLs, 1 ungraded RTO, and 1 ungraded Medic.
+- No back to back shifts, except RTO/MED-> PL/PSG
 - Each soldier gets at least one graded SL shift
 - Each soldier gets at least one PL or PSG shift
 
@@ -56,7 +56,7 @@ A lane is generally going to be a 24-36 hour period. These are set and distingui
 
 **Shift:**
 
-Most lanes will have multiple shifts. Generally these break into a patrol base shift, a planning shift, and an actions on objective shift.
+Most lanes will have multiple shifts. Generally these break into a patrol base shift, a planning shift, and an actions on objective shift. This is commonly also called a "look."
 """)
 
 
