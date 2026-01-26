@@ -265,7 +265,7 @@ for i, n in enumerate(SQUAD_SIZES, start=1):
 # ------------------------------------------------------------
 # Main
 # ------------------------------------------------------------
-if st.button("🚀 Generate Schedule", use_container_width=True):
+if st.button("Generate Schedule", use_container_width=True):
 
     if errors:
         st.error("🚫 Infeasible configuration:")
@@ -423,7 +423,7 @@ if st.button("🚀 Generate Schedule", use_container_width=True):
     max_people = [p for p, v in leadership_totals.items() if v == max_val]
     min_people = [p for p, v in leadership_totals.items() if v == min_val]
 
-    st.markdown("### 📊 Overall Leadership Load (SL + PL + PSG)")
+    st.markdown("###Overall Leadership Load (SL + PL + PSG)")
     st.text(
         f"Max SL+PL+PSG shifts: {max_val}  ({', '.join(max_people)})\n"
         f"Min SL+PL+PSG shifts: {min_val}  ({', '.join(min_people)})\n"
@@ -472,7 +472,7 @@ if st.button("🚀 Generate Schedule", use_container_width=True):
     # TEXT REPORT: Per-Soldier Leadership Summary
     # --------------------------------------------------------
     st.markdown("---")
-    st.header("🧾 Per-Soldier Leadership Summary")
+    st.header("Leadership Summary by Soldier")
 
     report_lines = []
 
