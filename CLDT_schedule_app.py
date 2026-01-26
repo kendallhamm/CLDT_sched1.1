@@ -432,6 +432,43 @@ if st.button("🚀 Generate Schedule", use_container_width=True):
         
 
     # --------------------------------------------------------
+    # CSV Export
+    # --------------------------------------------------------
+    shift_labels = [
+        f"L{ln+1}-S{sf+1}"
+        for ln in range(lanes)
+        for sf in range(lane_shifts[ln])
+    ]
+
+    rows = []
+    for p in people:
+        row = [p]
+        for ln in range(lanes):
+            for sf in range(lane_shifts[ln]):
+                t = offset[ln] + sf
+                cell = ""
+                for r in all_roles:
+                    if pulp.value(x[p, t, r]) > 0.5:
+                        cell = r
+                        if r.startswith("SL_") and pulp.value(g[p, t]) > 0.5:
+                            cell = f"{r}-G"
+                        break
+                row.append(cell)
+        rows.append(row)
+
+    df = pd.DataFrame(rows, columns=["Soldier"] + shift_labels)
+    buf = io.StringIO()
+    df.to_csv(buf, index=False)
+
+    st.download_button(
+        "📊 Download Full Schedule CSV",
+        buf.getvalue(),
+        "cldt_lane_shift_schedule.csv",
+        "text/csv",
+        use_container_width=True
+    )
+
+    # --------------------------------------------------------
     # TEXT REPORT: Per-Soldier Leadership Summary
     # --------------------------------------------------------
     st.markdown("---")
@@ -473,39 +510,3 @@ if st.button("🚀 Generate Schedule", use_container_width=True):
 
     st.text("\n".join(report_lines))
 
-    # --------------------------------------------------------
-    # CSV Export
-    # --------------------------------------------------------
-    shift_labels = [
-        f"L{ln+1}-S{sf+1}"
-        for ln in range(lanes)
-        for sf in range(lane_shifts[ln])
-    ]
-
-    rows = []
-    for p in people:
-        row = [p]
-        for ln in range(lanes):
-            for sf in range(lane_shifts[ln]):
-                t = offset[ln] + sf
-                cell = ""
-                for r in all_roles:
-                    if pulp.value(x[p, t, r]) > 0.5:
-                        cell = r
-                        if r.startswith("SL_") and pulp.value(g[p, t]) > 0.5:
-                            cell = f"{r}-G"
-                        break
-                row.append(cell)
-        rows.append(row)
-
-    df = pd.DataFrame(rows, columns=["Soldier"] + shift_labels)
-    buf = io.StringIO()
-    df.to_csv(buf, index=False)
-
-    st.download_button(
-        "📊 Download Full Schedule CSV",
-        buf.getvalue(),
-        "cldt_lane_shift_schedule.csv",
-        "text/csv",
-        use_container_width=True
-    )
