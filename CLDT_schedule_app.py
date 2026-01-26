@@ -33,15 +33,17 @@ st.title("CLDT Leadership Schedule Builder")
 st.info("""
 This tool builds a **CLDT leadership schedule** for a single PLT.
 
-Each soldier is guaranteed:
-- **At least one graded Squad Leader shift**
-- **At least one PL or PSG shift**
-- RTO & MED will become the next shift's PL & PSG, respectively.
+This model assumes:
+- Each shift includes 1 graded PL, 1 graded PSG, 2 graded SLs, 2 ungraded SLs, 1 ungraded RTO, and 1 ungraded Medic.
+- No back to back shifts, except RTO/MED-> PSG
+- Each soldier gets at least one graded SL shift
+- Each soldier gets at least one PL or PSG shift
+
 - Solver is optimizing to **minimize the difference between the most total shifts and the least**, or equitably distribute the workload across all soldiers.
 
-Squad integrity is preserved at all times.
-
 Use the toggles on the left of the screen to build your custom schedule. Then click **Generate Schedule** and you will receive a report as well as an option to download a .csv file. 
+
+Once complete you can paste your platoon roster (once sorted alphabetically by squad) into the most left column of that .csv file for a full look at your platoon's schedule.
 """)
 
 with st.expander("What's a lane vs a shift?"):
@@ -224,15 +226,15 @@ SQUAD_SIZES = [
 ]
 
 st.sidebar.subheader("Exercise Design")
-lanes = st.sidebar.number_input("Number of lanes", 6, 12, 6)
+lanes = st.sidebar.number_input("Number of lanes", 6, 12, 8)
 
 same_shifts = st.sidebar.checkbox("All lanes have same number of shifts", True)
 if same_shifts:
-    SHIFTS_PER_LANE = st.sidebar.number_input("Shifts per lane", 1, 3, 2)
+    SHIFTS_PER_LANE = st.sidebar.number_input("Shifts per lane", 1, 3, 3)
     lane_shifts = [SHIFTS_PER_LANE] * lanes
 else:
     lane_shifts = [
-        st.sidebar.number_input(f"Lane {l+1} shifts", 1, 3, 2)
+        st.sidebar.number_input(f"Lane {l+1} shifts", 1, 3, 3)
         for l in range(lanes)
     ]
 
