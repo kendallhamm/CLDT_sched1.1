@@ -31,7 +31,7 @@ st.set_page_config(
 st.title("CLDT Leadership Schedule Builder")
 
 st.info("""
-This tool builds a **CLDT leadership schedule**.
+This tool builds a **CLDT leadership schedule** for a single PLT.
 
 Each soldier is guaranteed:
 - **At least one graded Squad Leader shift**
@@ -41,7 +41,7 @@ Each soldier is guaranteed:
 
 Squad integrity is preserved at all times.
 
-Use the toggles on the left of the screen to build your custom schedule. Then click **Generate Schedule** and scroll through the report to the option to download as a .CSV. 
+Use the toggles on the left of the screen to build your custom schedule. Then click **Generate Schedule** and you will receive a report as well as an option to download a .csv file. 
 """)
 
 with st.expander("What's a lane vs a shift?"):
