@@ -225,24 +225,6 @@ The solver returns the **fairest possible solution**, not necessarily a perfectl
 even one.
 """)
 
-#Usage Display
-with st.sidebar:
-    st.markdown("### App Usage")
-    st.markdown("# Updates every ~5 minutes")
-
-    total = get_total_schedules_generated()
-
-    if total is not None:
-        st.metric(
-            label="Schedules generated",
-            value=total
-        )
-    else:
-        st.metric(
-            label="Schedules generated",
-            value="—"
-        )
-
 
 # ------------------------------------------------------------
 # Sidebar Inputs
@@ -270,6 +252,23 @@ else:
         for l in range(lanes)
     ]
 
+#Usage Display
+with st.sidebar:
+    st.markdown("# App Usage")
+    st.markdown("### Updates every ~5 minutes")
+
+    total = get_total_schedules_generated()
+
+    if total is not None:
+        st.metric(
+            label="Schedules generated",
+            value=total
+        )
+    else:
+        st.metric(
+            label="Schedules generated",
+            value="—"
+        )
 
 # ------------------------------------------------------------
 # Derived values
