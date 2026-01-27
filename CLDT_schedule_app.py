@@ -24,22 +24,16 @@ import requests
 # ============================================================
 
 
-# GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycbyMKpTxeNtqGQpDr4IZkJQYdSORvrnjGNCSwGtgBIui1YGgAmZdiSYARy9SWJf1fUhhCg/exec"
+GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycbyMKpTxeNtqGQpDr4IZkJQYdSORvrnjGNCSwGtgBIui1YGgAmZdiSYARy9SWJf1fUhhCg/exec"
 
-# def log_schedule_generated():
-#     try:
-#         requests.post(GOOGLE_APP_URL, timeout=5)
-#     except Exception:
-#         # Fail silently: logging should never break scheduling
-#         pass
+def log_schedule_generated():
+    try:
+        requests.post(GOOGLE_APP_URL, timeout=5)
+    except Exception:
+        # Fail silently: logging should never break scheduling
+        pass
 
-# @st.cache_data(ttl=300)  # refresh every 5 minutes
-# def get_total_generated():
-#     try:
-#         r = requests.get(GOOGLE_APP_URL, timeout=5)
-#         return int(r.text)
-#     except Exception:
-#         return None
+
 
 st.title("CLDT Leadership Schedule Builder")
 
@@ -250,10 +244,7 @@ else:
         st.sidebar.number_input(f"Lane {l+1} shifts", 1, 3, 3)
         for l in range(lanes)
     ]
-# st.sidebar.metric(
-#     "Total schedules created",
-#     total_schedules
-# )
+
 
 # ------------------------------------------------------------
 # Derived values
@@ -417,6 +408,8 @@ if st.button("Generate Schedule", use_container_width=True):
     model.solve(solver)
 
     st.success("✅ Schedule generated with guaranteed leadership exposure")
+    # Log successful schedule generation
+    log_schedule_generated()
 
     # --------------------------------------------------------
     # TEXT REPORT: Overall Leadership Load Summary
