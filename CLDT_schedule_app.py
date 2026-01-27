@@ -79,11 +79,11 @@ A lane is generally going to be a 24-36 hour period. These are set and distingui
 Most lanes will have multiple shifts. Generally these break into a patrol base shift, a planning shift, and an actions on objective shift. This is commonly also called a "look."
 """)
 
+# FAQ / Help items
+with st.expander("Schedule not building?"):
+    st.markdown(r"""
 
-st.info("""
-Having trouble?  
-
-There are a few combinations that mathematically present unsolvable schedules. 
+There are a few combinations that  present mathematically unsolvable/infeasible schedules. 
 The key four are highlighted below. 
 
 Let:
@@ -98,9 +98,9 @@ A schedule can be generated ONLY if all of the following conditions are met.
 4) nₛ × ⌈T / 3⌉ ≥ T
 
 These conditions are more detailed below if you have additional questions.
-""")
-with st.expander("Click here for Supporting Math for Feasibility Conditions"):
-    st.markdown(r"""
+
+
+    
 ### Feasibility Rules (Based on Platoon size and total number of shifts)
 
 Let:
