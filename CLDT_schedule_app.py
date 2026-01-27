@@ -33,13 +33,11 @@ def log_schedule_generated():
         # Fail silently: logging should never break scheduling
         pass
 
-@st.cache_data(ttl=300)  # refresh every 5 minutes
+@st.cache_data(ttl=300, show_spinner=False)  # refresh every 5 minutes
 def get_total_schedules_generated():
-    try:
-        r = requests.get(GOOGLE_APP_URL, timeout=5)
-        return int(r.text)
-    except Exception:
-        return None
+    r = requests.get(GOOGLE_APP_URL, timeout=5)
+    r.raise_for_status()
+    return int(r.text)
 
 
 
