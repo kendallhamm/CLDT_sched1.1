@@ -51,7 +51,7 @@ def get_total_schedules_generated():
 st.title("CLDT Leadership Schedule Builder")
 
 st.info("""
-This tool builds a **CLDT leadership schedule** for a single PLT.
+This tool builds a **CLDT leadership schedule** for a single Platoon.
 
 This model assumes:
 - Each shift (also known as a 'look') includes 1 graded PL, 1 graded PSG, 2 graded SLs, 2 ungraded SLs, 1 ungraded RTO, and 1 ungraded Medic.
