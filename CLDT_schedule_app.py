@@ -80,7 +80,7 @@ Most lanes will have multiple shifts. Generally these break into a patrol base s
 """)
 
 # FAQ / Help items
-with st.expander("Schedule not building?"):
+with st.expander("HELP!!!! My schedule is not building!"):
     st.markdown(r"""
 
 There are a few combinations that  present mathematically unsolvable/infeasible schedules. 
