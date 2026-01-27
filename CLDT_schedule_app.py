@@ -24,7 +24,7 @@ import requests
 # ============================================================
 
 
-GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycbyMKpTxeNtqGQpDr4IZkJQYdSORvrnjGNCSwGtgBIui1YGgAmZdiSYARy9SWJf1fUhhCg/exec"
+GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycbzjUh59dgNZ4AfbyQGFIBOGVpOnrsW0XQ6TkxaSrcE50sHpE__YFUZVBbFtp26RzC4B9w/exec"
 
 def log_schedule_generated():
     try:
