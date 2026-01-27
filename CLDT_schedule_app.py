@@ -227,8 +227,8 @@ even one.
 
 #Usage Display
 with st.sidebar:
-    st.markdown("###App Usage")
-    st.markdown("#Updates every ~5 minutes")
+    st.markdown("### App Usage")
+    st.markdown("# Updates every ~5 minutes")
 
     total = get_total_schedules_generated()
 
