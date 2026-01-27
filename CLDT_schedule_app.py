@@ -250,10 +250,10 @@ else:
         st.sidebar.number_input(f"Lane {l+1} shifts", 1, 3, 3)
         for l in range(lanes)
     ]
-st.sidebar.metric(
-    "Total schedules created",
-    total_schedules
-)
+# st.sidebar.metric(
+#     "Total schedules created",
+#     total_schedules
+# )
 
 # ------------------------------------------------------------
 # Derived values
