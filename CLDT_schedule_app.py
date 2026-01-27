@@ -23,8 +23,6 @@ import requests
 # Solver will NOT run if configuration is infeasible.
 # ============================================================
 
-import streamlit as st
-import requests
 
 GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycbyMKpTxeNtqGQpDr4IZkJQYdSORvrnjGNCSwGtgBIui1YGgAmZdiSYARy9SWJf1fUhhCg/exec"
 
