@@ -35,9 +35,14 @@ def log_schedule_generated():
 
 @st.cache_data(ttl=300, show_spinner=False)  # refresh every 5 minutes
 def get_total_schedules_generated():
-    r = requests.get(GOOGLE_APP_URL, timeout=5)
-    r.raise_for_status()
-    return int(r.text)
+    try:
+        r = requests.get(GOOGLE_APP_URL, timeout=15)
+        r.raise_for_status()
+        return int(r.text)
+    except Exception:
+        # Analytics should never break the app
+        return None
+
 
 
 
