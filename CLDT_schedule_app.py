@@ -36,7 +36,7 @@ def log_schedule_generated():
 @st.cache_data(ttl=300)  # refresh every 5 minutes
 def get_total_schedules_generated():
     try:
-        r = requests.get(GOOGLE_APP_URL, timeout=5)
+        r = requests.get(GOOGLE_APP_URL, timeout=1)
         return int(r.text)
     except Exception:
         return None
