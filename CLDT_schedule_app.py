@@ -256,8 +256,7 @@ else:
 with st.sidebar:
 
     total = get_total_schedules_generated()
-    st.markdown("##### Updates every ~5 minutes")
-    
+
     if total is not None:
         st.metric(
             label="Schedules generated",
@@ -268,7 +267,7 @@ with st.sidebar:
             label="Schedules generated",
             value="—"
         )
-
+    st.markdown("##### Updates every ~5 minutes")
 
 # ------------------------------------------------------------
 # Derived values
