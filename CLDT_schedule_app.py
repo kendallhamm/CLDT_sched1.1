@@ -33,6 +33,14 @@ def log_schedule_generated():
         # Fail silently: logging should never break scheduling
         pass
 
+@st.cache_data(ttl=300)  # refresh every 5 minutes
+def get_total_schedules_generated():
+    try:
+        r = requests.get(GOOGLE_APP_URL, timeout=5)
+        return int(r.text)
+    except Exception:
+        return None
+
 
 
 st.title("CLDT Leadership Schedule Builder")
@@ -217,6 +225,23 @@ The solver returns the **fairest possible solution**, not necessarily a perfectl
 even one.
 """)
 
+#Usage Display
+with st.sidebar:
+    st.markdown("###App Usage")
+    st.markdown("#Updates every ~5 minutes")
+
+    total = get_total_schedules_generated()
+
+    if total is not None:
+        st.metric(
+            label="Schedules generated",
+            value=total
+        )
+    else:
+        st.metric(
+            label="Schedules generated",
+            value="—"
+        )
 
 
 # ------------------------------------------------------------
@@ -410,6 +435,8 @@ if st.button("Generate Schedule", use_container_width=True):
     st.success("✅ Schedule generated with guaranteed leadership exposure")
     # Log successful schedule generation
     log_schedule_generated()
+    get_total_schedules_generated.clear()
+
 
     # --------------------------------------------------------
     # TEXT REPORT: Overall Leadership Load Summary
