@@ -77,7 +77,7 @@ Most lanes will have multiple shifts. Generally these break into a patrol base s
 
 
 st.info("""
-FEASIBILITY RULES 
+Having trouble?  
 
 There are a few combinations that mathematically present unsolvable schedules. 
 The key four are highlighted below. 
@@ -93,7 +93,7 @@ A schedule can be generated ONLY if all of the following conditions are met.
 3) nₛ × ⌈T / 2⌉ ≥ T
 4) nₛ × ⌈T / 3⌉ ≥ T
 
-These conditions are more detailed below if you are interested in the math behind them.
+These conditions are more detailed below if you have additional questions.
 """)
 with st.expander("Click here for Supporting Math for Feasibility Conditions"):
     st.markdown(r"""
