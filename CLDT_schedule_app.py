@@ -23,35 +23,31 @@ import requests
 # Solver will NOT run if configuration is infeasible.
 # ============================================================
 
-# --- Usage logging (runs once per user session) ---
+import streamlit as st
+import requests
+
 GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycbyMKpTxeNtqGQpDr4IZkJQYdSORvrnjGNCSwGtgBIui1YGgAmZdiSYARy9SWJf1fUhhCg/exec"
 
 # --- Log usage once per session ---
-# if "usage_logged" not in st.session_state:
-#     st.session_state.usage_logged = True
-#     st.components.v1.html(
-#         f"""
-#         <script>
-#         fetch("{GOOGLE_APP_URL}", {{ method: "POST" }});
-#         </script>
-#         """,
-#         height=0
-#     )
+if "usage_logged" not in st.session_state:
+    st.session_state.usage_logged = True
+    st.components.v1.html(
+        f"""
+        <script>
+        fetch("{GOOGLE_APP_URL}", {{ method: "POST" }});
+        </script>
+        """,
+        height=0
+    )
 
-# # --- Get total usage count ---
-# @st.cache_data(ttl=300)  # refresh every 5 minutes
-# def get_total_count():
-#     r = requests.get(GOOGLE_APP_URL, timeout=5)
-#     return int(r.text)
+# --- Get total usage count ---
+@st.cache_data(ttl=300)  # refresh every 5 minutes
+def get_total_count():
+    r = requests.get(GOOGLE_APP_URL, timeout=5)
+    return int(r.text)
 
-# total_schedules = get_total_count()
+total_schedules = get_total_count()
 
-
-# st.set_page_config(
-#     page_title="CLDT Leadership Schedule Builder",
-#     layout="wide",
-#     page_icon="🫡"
-# )
 
 st.title("CLDT Leadership Schedule Builder")
 
