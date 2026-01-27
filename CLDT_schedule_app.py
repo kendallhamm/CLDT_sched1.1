@@ -252,6 +252,12 @@ else:
         for l in range(lanes)
     ]
 
+st.sidebar.markdown("---")
+generate_clicked = st.sidebar.button("Generate Schedule", use_container_width=True)
+
+st.sidebar.markdown("---")
+
+
 #Usage Display
 with st.sidebar:
 
@@ -299,7 +305,9 @@ for i, n in enumerate(SQUAD_SIZES, start=1):
 # ------------------------------------------------------------
 # Main
 # ------------------------------------------------------------
-if st.button("Generate Schedule", use_container_width=True):
+if generate_clicked:
+    # solver logic
+
 
     if errors:
         st.error("🚫 Infeasible configuration:")
