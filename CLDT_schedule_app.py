@@ -24,28 +24,22 @@ import requests
 # ============================================================
 
 
-GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycbyMKpTxeNtqGQpDr4IZkJQYdSORvrnjGNCSwGtgBIui1YGgAmZdiSYARy9SWJf1fUhhCg/exec"
+# GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycbyMKpTxeNtqGQpDr4IZkJQYdSORvrnjGNCSwGtgBIui1YGgAmZdiSYARy9SWJf1fUhhCg/exec"
 
-# --- Log usage once per session ---
-if "usage_logged" not in st.session_state:
-    st.session_state.usage_logged = True
-    st.components.v1.html(
-        f"""
-        <script>
-        fetch("{GOOGLE_APP_URL}", {{ method: "POST" }});
-        </script>
-        """,
-        height=0
-    )
+# def log_schedule_generated():
+#     try:
+#         requests.post(GOOGLE_APP_URL, timeout=5)
+#     except Exception:
+#         # Fail silently: logging should never break scheduling
+#         pass
 
-# --- Get total usage count ---
-@st.cache_data(ttl=300)  # refresh every 5 minutes
-def get_total_count():
-    r = requests.get(GOOGLE_APP_URL, timeout=5)
-    return int(r.text)
-
-total_schedules = get_total_count()
-
+# @st.cache_data(ttl=300)  # refresh every 5 minutes
+# def get_total_generated():
+#     try:
+#         r = requests.get(GOOGLE_APP_URL, timeout=5)
+#         return int(r.text)
+#     except Exception:
+#         return None
 
 st.title("CLDT Leadership Schedule Builder")
 
