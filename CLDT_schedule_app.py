@@ -24,6 +24,7 @@ import requests
 # ============================================================
 
 
+#Analytics- usage logging function definition
 GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycbzjUh59dgNZ4AfbyQGFIBOGVpOnrsW0XQ6TkxaSrcE50sHpE__YFUZVBbFtp26RzC4B9w/exec"
 
 def log_schedule_generated():
@@ -33,10 +34,11 @@ def log_schedule_generated():
         # Fail silently: logging should never break scheduling
         pass
 
+# Refresh of 'total schedules generated' value function definition
 @st.cache_data(ttl=300, show_spinner=False)  # refresh every 5 minutes
 def get_total_schedules_generated():
     try:
-        r = requests.get(GOOGLE_APP_URL, timeout=15)
+        r = requests.get(GOOGLE_APP_URL, timeout=15) # timeout at 15 seconds. 5 was too short for stale script.
         r.raise_for_status()
         return int(r.text)
     except Exception:
@@ -99,12 +101,12 @@ These conditions are more detailed below if you have additional questions.
 """)
 with st.expander("Click here for Supporting Math for Feasibility Conditions"):
     st.markdown(r"""
-### Feasibility Rules (Based on P and T)
+### Feasibility Rules (Based on Platoon size and total number of shifts)
 
 Let:
 - \( P \) = total number of soldiers  
 - \( T \) = total number of shifts across all lanes  
-- \( n_s \) = size of squad \( s \)
+- \( nₛ \) = size of squad \( s \)
 
 A schedule can be generated **only if all of the following conditions are met**.
 
