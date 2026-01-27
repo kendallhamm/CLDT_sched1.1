@@ -22,6 +22,22 @@ import math
 # Solver will NOT run if configuration is infeasible.
 # ============================================================
 
+# --- Usage logging (runs once per user session) ---
+if "usage_logged" not in st.session_state:
+    st.session_state.usage_logged = True
+
+    st.components.v1.html(
+        """
+        <script>
+        fetch("https://script.google.com/macros/s/AKfycbyMKpTxeNtqGQpDr4IZkJQYdSORvrnjGNCSwGtgBIui1YGgAmZdiSYARy9SWJf1fUhhCg/exec", {
+            method: "POST"
+        });
+        </script>
+        """,
+        height=0
+    )
+
+
 st.set_page_config(
     page_title="CLDT Leadership Schedule Builder",
     layout="wide",
@@ -92,7 +108,7 @@ A schedule can be generated **only if all of the following conditions are met**.
 
 ---
 
-#### 1️⃣ Global Manpower Capacity
+#### 1️⃣ Capacity across the platoon
 
 Each shift requires **8 different soldiers**:
 - PL, PSG, RTO, MED  
@@ -110,7 +126,7 @@ If this condition fails, there are not enough soldiers to staff all shifts.
 
 ---
 
-#### 2️⃣ Leadership Exposure Requirements
+#### 2️⃣ Graded shift requirement
 
 Every soldier must:
 - Serve **at least once** as PL or PSG  
@@ -128,7 +144,7 @@ If this condition fails, there are not enough leadership opportunities for every
 
 ---
 
-#### 3️⃣ Squad-Locked SL Capacity
+#### 3️⃣ Squad integrity- SL leads his/her own squad, only
 
 Each squad must provide **exactly one Squad Leader every shift**.
 Squad Leaders are locked to their own squad.
@@ -144,7 +160,7 @@ If any squad fails this condition, it cannot sustain SL coverage across all shif
 
 ---
 
-#### 4️⃣ Sequencing-Induced Workload (Critical)
+#### 4️⃣ RTO/MED transitioning to PL/PSG (Critical)
 
 RTO and MED roles are paired with leadership roles on the next shift:
 - RTO\(t\) → PL\(t+1\)  
@@ -164,7 +180,7 @@ If this condition fails, sequencing forces overloads and no valid schedule exist
 
 ---
 
-#### 5️⃣ Squad Integrity (Platoon-Level Pull Limit)
+#### 5️⃣ Squad min-force: pull no more than 2 soldiers per squad for platoon level taskings
 
 To preserve unit integrity:
 - **No more than 2 soldiers per squad per shift** may serve as  
@@ -189,7 +205,7 @@ roles from being filled legally.
 
 ---
 
-#### 6️⃣ Fairness Expectation (Optimization Objective)
+#### 6️⃣ Equitable total workload (Optimization Objective)
 
 The solver minimizes the difference between the **most-worked** and **least-worked**
 soldiers.
