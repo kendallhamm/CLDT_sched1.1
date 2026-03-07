@@ -230,6 +230,41 @@ The solver returns the **fairest possible solution**, not necessarily a perfectl
 even one.
 """)
 
+with st.expander("Why do some soldiers get a second shift before others have had a first?"):
+    st.markdown(r"""
+Strict chronological fairness would require that no soldier receives a second PL or PSG assignment until every soldier has received their first, in time order.
+
+While that sounds reasonable, enforcing this rule dramatically increases the mathematical complexity of the schedule. The solver would need to track leadership exposure for every soldier at every shift, not just total exposures.
+
+For example, with 32 soldiers and 27 shifts, enforcing temporal fairness adds over 800 additional binary decision variables and hundreds of constraints. Optimization problems with binary decisions do not scale linearly, so this significantly increases solve time and the risk of infeasible schedules.
+
+When combined with:
+- No back-to-back shifts  
+- Required RTO/MED → PL/PSG sequencing  
+- Squad integrity rules  
+
+Strict chronological fairness often becomes mathematically impossible unless the exercise is long enough relative to platoon size.
+
+In general, temporal PL/PSG fairness requires:
+
+$$
+t \ge \frac{P}{2}
+$$
+
+Where:
+- \( t \) = number of shifts or "looks"
+- \( P \) = number of soldiers in Platoon
+
+If this condition is not met, someone must receive a second leadership opportunity before all soldiers have received their first.
+Even though most CLDT scenarios do meet this condition the amount of additional constraints and variables that temporal fairness injects into the system overall is not an even tradeoff. 
+
+Instead of enforcing strict chronological order, this tool guarantees:
+- Every soldier receives required leadership exposure  
+- Workload is distributed as evenly as possible  
+- All structural and sequencing rules are honored  
+
+The result is fair outcomes without sacrificing feasibility or performance.
+""")
 
 # ------------------------------------------------------------
 # Sidebar Inputs
