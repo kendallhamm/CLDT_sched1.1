@@ -248,7 +248,7 @@ Strict chronological fairness often becomes mathematically impossible unless the
 In general, temporal PL/PSG fairness requires:
 
 $$
-t \ge \frac{P}{2}
+T \ge \frac{P}{2}
 $$
 
 Where:
