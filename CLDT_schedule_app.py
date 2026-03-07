@@ -517,9 +517,11 @@ if generate_clicked:
         )
         
 
+
     # --------------------------------------------------------
-    # CSV Export
+    # CSV Export (Schedule + Leadership Summary)
     # --------------------------------------------------------
+
     shift_labels = [
         f"L{ln+1}-S{sf+1}"
         for ln in range(lanes)
@@ -527,8 +529,18 @@ if generate_clicked:
     ]
 
     rows = []
+    summary_rows = []
+
     for p in people:
         row = [p]
+
+        sl_total = 0
+        sl_graded = 0
+        sl_ungraded = 0
+        pl_count = 0
+        psg_count = 0
+
+        # Build schedule cells
         for ln in range(lanes):
             for sf in range(lane_shifts[ln]):
                 t = offset[ln] + sf
@@ -540,11 +552,59 @@ if generate_clicked:
                             cell = f"{r}-G"
                         break
                 row.append(cell)
+
+        # Leadership counts
+        for t in shifts:
+            if pulp.value(x[p, t, "PL"]) > 0.5:
+                pl_count += 1
+            if pulp.value(x[p, t, "PSG"]) > 0.5:
+                psg_count += 1
+
+            sl_role = f"SL_{person_squad[p] + 1}"
+            if pulp.value(x[p, t, sl_role]) > 0.5:
+                sl_total += 1
+                if pulp.value(g[p, t]) > 0.5:
+                    sl_graded += 1
+                else:
+                    sl_ungraded += 1
+
         rows.append(row)
 
-    df = pd.DataFrame(rows, columns=["Soldier"] + shift_labels)
+        summary_rows.append([
+            sl_graded + sl_ungraded + pl_count + psg_count,
+            sl_total,
+            pl_count + psg_count,
+            pl_count,
+            psg_count,
+            sl_graded,
+            sl_ungraded
+        ])
+
+    # Build schedule dataframe
+    df_schedule = pd.DataFrame(rows, columns=["Soldier"] + shift_labels)
+
+    # Drop last 5 shift columns if they exist
+    if len(shift_labels) >= 5:
+        df_schedule = df_schedule.iloc[:, :-5]
+
+    # Build summary dataframe
+    summary_columns = [
+        "Total Leadership Shifts",
+        "Total SL Shifts",
+        "Total PL+PSG Shifts",
+        "PL Shifts",
+        "PSG Shifts",
+        "Graded SL Shifts",
+        "Ungraded SL Shifts"
+    ]
+
+    df_summary = pd.DataFrame(summary_rows, columns=summary_columns)
+
+    # Combine schedule + summary
+    df_final = pd.concat([df_schedule, df_summary], axis=1)
+
     buf = io.StringIO()
-    df.to_csv(buf, index=False)
+    df_final.to_csv(buf, index=False)
 
     st.download_button(
         "📊 Download Full Schedule CSV",
