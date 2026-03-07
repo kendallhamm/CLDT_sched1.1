@@ -273,10 +273,10 @@ st.sidebar.header("Exercise Configuration")
 
 st.sidebar.subheader("Squad Composition")
 SQUAD_SIZES = [
-    st.sidebar.number_input("Squad 1 size", 6, 9, 6),
-    st.sidebar.number_input("Squad 2 size", 6, 9, 6),
-    st.sidebar.number_input("Squad 3 size", 6, 9, 6),
-    st.sidebar.number_input("Squad 4 size", 6, 9, 6),
+    st.sidebar.number_input("Squad 1 size", 6, 9, 8),
+    st.sidebar.number_input("Squad 2 size", 6, 9, 8),
+    st.sidebar.number_input("Squad 3 size", 6, 9, 8),
+    st.sidebar.number_input("Squad 4 size", 6, 9, 8),
 ]
 
 st.sidebar.subheader("Exercise Design")
