@@ -232,6 +232,9 @@ even one.
 
 with st.expander("Why do some soldiers get a second shift before others have had a first?"):
     st.markdown(r"""
+
+BLUF: It's really hard for the computer and makes the math requirements much more difficult to solve. It creates more "infeasible solutions" or occasions where it is impossible to statisfy all constraints. Longer story below...
+
 Strict chronological fairness would require that no soldier receives a second PL or PSG assignment until every soldier has received their first, in time order.
 
 While that sounds reasonable, enforcing this rule dramatically increases the mathematical complexity of the schedule. The solver would need to track leadership exposure for every soldier at every shift, not just total exposures.
