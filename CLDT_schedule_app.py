@@ -231,7 +231,9 @@ even one.
 """)
 
 with st.expander("Why do some soldiers get a second shift before others have had a first?"):
-    st.markdown(r"""
+    st.markdown("""
+**BLUF:** It is computationally expensive to enforce strict chronological fairness, and doing so often makes the problem infeasible.
+
 Strict chronological fairness would require that no soldier receives a second PL or PSG assignment until every soldier has received their first, in time order.
 
 While that sounds reasonable, enforcing this rule dramatically increases the mathematical complexity of the schedule. The solver would need to track leadership exposure for every soldier at every shift, not just total exposures.
@@ -246,17 +248,18 @@ When combined with:
 Strict chronological fairness often becomes mathematically impossible unless the exercise is long enough relative to platoon size.
 
 In general, temporal PL/PSG fairness requires:
+""")
 
-$$
-T \ge \frac{P}{2}
-$$
+    st.latex(r"t \ge \frac{P}{2}")
 
+    st.markdown("""
 Where:
-- \( t \) = number of shifts or "looks"
-- \( P \) = number of soldiers in Platoon
+- t = number of shifts or "looks"
+- P = number of soldiers in the platoon
 
 If this condition is not met, someone must receive a second leadership opportunity before all soldiers have received their first.
-Even though most CLDT scenarios do meet this condition the amount of additional constraints and variables that temporal fairness injects into the system overall is not an even tradeoff. 
+
+Even when this condition is met, the additional constraints and variables required to enforce temporal fairness are not worth the tradeoff in performance and feasibility.
 
 Instead of enforcing strict chronological order, this tool guarantees:
 - Every soldier receives required leadership exposure  
