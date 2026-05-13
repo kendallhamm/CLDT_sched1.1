@@ -271,6 +271,16 @@ Instead of enforcing strict chronological order, this tool guarantees:
 The result is fair outcomes without sacrificing feasibility or performance.
 """)
 
+st.markdown("### Feedback")
+
+st.markdown(
+    "Have feedback or suggestions? Use the form below to help improve the tool."
+)
+
+st.link_button(
+    "Submit Feedback",
+    "https://docs.google.com/forms/d/e/1FAIpQLScczIeWgvkNpkLfchIzYEQatdIHyIbTNq1NmWKbTKkTONXHcQ/viewform?usp=sharing&ouid=118042726790791796385"
+)
 # ------------------------------------------------------------
 # Sidebar Inputs
 # ------------------------------------------------------------
