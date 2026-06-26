@@ -295,9 +295,23 @@ SQUAD_SIZES = [
 ]
 
 st.sidebar.subheader("Exercise Design")
-lanes = st.sidebar.number_input("Number of lanes", 6, 12, 8)
+default_2026 = st. sidebar.checkbox("Use DMI CST 2026 default lane scheme", True)
+if default_2026 is True:
+    lanes = 8
+    lane_shifts = []
+    lane_shifts[0] = 2
+    lane_shifts[1] = 3
+    lane_shifts[2] = 3
+    lane_shifts[3] = 3
+    lane_shifts[4] = 3
+    lane_shifts[5] = 3
+    lane_shifts[6] = 3
+    lane_shifts[8] = 1
+    
+if default_2026 is False:
+    lanes = st.sidebar.number_input("Number of lanes", 6, 12, 8)
+    same_shifts = st.sidebar.checkbox("All lanes have same number of shifts", False)
 
-same_shifts = st.sidebar.checkbox("All lanes have same number of shifts", True)
 if same_shifts:
     SHIFTS_PER_LANE = st.sidebar.number_input("Shifts per lane", 1, 3, 3)
     lane_shifts = [SHIFTS_PER_LANE] * lanes
