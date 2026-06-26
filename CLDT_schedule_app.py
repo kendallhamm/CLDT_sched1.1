@@ -445,12 +445,19 @@ if generate_clicked:
             model += pulp.lpSum(x[p, t, r] for r in all_roles) == y[p, t]
 
     # Squad pull cap
+    # Squad pull cap (includes Squad Leader)
     for t in shifts:
         for s_idx in range(S):
-            model += pulp.lpSum(
-                x[p, t, r]
-                for p in people if person_squad[p] == s_idx
-                for r in platoon_roles
+            model += (
+                pulp.lpSum(
+                    x[p, t, r]
+                    for p in people if person_squad[p] == s_idx
+                    for r in platoon_roles
+                )
+                + pulp.lpSum(
+                    x[p, t, role_SL[s_idx]]
+                    for p in people if person_squad[p] == s_idx
+                )
             ) <= 2
 
     # Sequencing + rest
