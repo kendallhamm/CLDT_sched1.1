@@ -6,7 +6,7 @@ A web-based application for generating optimal leadership rotation schedules for
 
 - **Smart Optimization**: Uses mixed integer linear programming to minimize shift inequality across soldiers
 - **Flexible Configuration**: 
-  - Variable squad sizes (6-9 soldiers per squad)
+  - Variable squad sizes
   - Adjustable lane and shift counts
 - **Fair Distribution**: Ensures balanced workload across all soldiers
 - **Professional Output**: Clean schedule display and CSV export
@@ -38,17 +38,18 @@ A web-based application for generating optimal leadership rotation schedules for
 ### Input Configuration
 
 1. **Squad Composition** (Sidebar)
-   - Set the number of soldiers in each of the 4 squads (6-9 per squad)
+   - Set the number of soldiers in each of the 4 squads
 
 2. **Exercise Design** (Sidebar)
+   - Option for default DMI lane plan for CST 2026! Use this if you don't want to modify the general scheme (most people will want to use the default!)
    - Number of lanes (6-12)
    - Shifts per lane (1-3)
-   - Option for variable shifts per lane
 
-3. **Training Options** (Sidebar)
+
+4. **Training Options** (Sidebar)
    - Maybe more features coming!
 
-4. **Generate Schedule**
+5. **Generate Schedule**
    - Click "Generate Schedule" button
    - Wait for solver (may take up to 60 seconds for complex configurations)
 
@@ -89,7 +90,7 @@ If the solver returns an infeasible solution:
 - **Check squad sizes**: Very small squads may struggle with all constraints
 
 ### Slow Performance
-- Complex configurations (many soldiers, many shifts, team leaders enabled) take longer
+- Complex configurations (many soldiers, many shifts) take longer
 - Allow up to 60 seconds for optimization
 - Consider simplifying configuration for faster results
 
@@ -111,7 +112,7 @@ pip install -r requirements.txt --no-cache-dir
 
 Built by K. Hamm with heavy assistance from ChatGPT 5.0 and 5.2
 
-Questions/Comments/Feedback - reach out to K. Hamm
+Questions/Comments/Feedback - reach out to K. Hamm or use the feedback tool.
 
 ## License
 
