@@ -61,7 +61,11 @@ This model assumes:
 
 - Solver is optimizing to **minimize the difference between the most total shifts and the least**, or equitably distribute the workload across all soldiers.
 
-Use the toggles on the left of the screen to build your custom schedule. Then click **Generate Schedule** and you will receive a report as well as an option to download a .csv file. 
+Use the toggles on the left of the screen to build your custom schedule. 
+
+Most users will prefer the **Default Lane Scheme** which is nested within the guidance provided by USMA DMI for CST 2026.
+
+Then click **Generate Schedule** and you will receive a report as well as an option to download a .csv file. 
 
 Once complete you can paste your platoon roster (once sorted alphabetically by squad) into the most left column of that .csv file for a full look at your platoon's schedule.
 """)
