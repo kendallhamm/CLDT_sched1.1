@@ -286,7 +286,7 @@ st.link_button(
     "https://docs.google.com/forms/d/e/1FAIpQLScczIeWgvkNpkLfchIzYEQatdIHyIbTNq1NmWKbTKkTONXHcQ/viewform?usp=sharing&ouid=118042726790791796385"
 )
 
-st.markdown("#### Data Collection")
+st.markdown("###### Data Collection")
 
 st.markdown(
     "This app logs a timestamp (e.g., 1/28/2026 6:48:44) each time a schedule is generated. No personal or platoon data is collected or transmitted; this counter is used solely to gauge overall usage of the tool."
