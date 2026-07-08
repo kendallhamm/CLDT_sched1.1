@@ -105,6 +105,8 @@ st.title("CLDT Leadership Schedule Builder")
 st.info("""
 This tool builds a **CLDT leadership schedule** for a single Platoon.
 
+Note- this is a 3 tiered solver, it may take up to 60-90 seconds to identify a solution after clicking "Generate Schedule"
+
 This model assumes:
 - Each shift (also known as a 'look') includes 1 graded PL, 1 graded PSG, 2 graded SLs, 2 ungraded SLs, 1 ungraded RTO, and 1 ungraded Medic.
 - No back to back shifts, except RTO/MED-> PL/PSG
