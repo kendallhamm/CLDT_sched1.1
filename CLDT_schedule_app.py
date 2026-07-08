@@ -20,8 +20,39 @@ import requests
 #   • One role per soldier per shift
 #   • No back-to-back shifts except sequencing
 #
+# FAIRNESS OBJECTIVE (two-tier):
+#   The solver optimizes two things, in strict priority order, in a single
+#   solve. It never trades a better tier-1 outcome for a better tier-2 one.
+#
+#   Tier 1 (primary):   minimize max-min spread of Sp = leadership shifts
+#                        per soldier, where leadership shifts = SL (graded
+#                        + ungraded) + PL + PSG. RTO/MED are deliberately
+#                        excluded from Sp: they're support roles, not
+#                        leadership reps, so a soldier shouldn't be able to
+#                        "hide" an uneven leadership load behind a
+#                        well-balanced raw shift count. (RTO/MED still
+#                        count toward y[p,t] for the rest-rule / one-role-
+#                        per-shift logic above; they're only excluded from
+#                        the fairness objective itself.)
+#
+#   Tier 2 (secondary):  among schedules that tie on Tier 1, minimize
+#                        max-min spread of Gp = graded SL shifts only per
+#                        soldier. This is a "free" tiebreaker: which 2 of
+#                        the 4 on-duty SLs get graded each shift doesn't
+#                        change who holds SL/PL/PSG/RTO/MED, so improving
+#                        it can never cost anything against Tier 1.
+#
+#   Mechanism: both tiers are folded into one linear objective,
+#   (zmax - zmin) + EPSILON * (zmax_g - zmin_g), with EPSILON set well
+#   below 1/T_max so Tier 2 can never outweigh even a 1-shift improvement
+#   in Tier 1. See the "Fairness objective" section below for the exact
+#   bound. This avoids a second model.solve() call (the alternative,
+#   equivalent approach: solve Tier 1 alone, lock its optimal value as a
+#   constraint, then solve Tier 2 alone).
+#
 # Solver will NOT run if configuration is infeasible.
 # ============================================================
+
 
 
 #Analytics- usage logging function definition
@@ -59,7 +90,9 @@ This model assumes:
 - Each soldier gets at least one graded SL shift
 - Each soldier gets at least one PL or PSG shift
 
-- Solver is optimizing to **minimize the difference between the most total shifts and the least**, or equitably distribute the workload across all soldiers.
+- Solver is optimizing for two things, in strict priority order:
+  1. **Leadership balance (primary):** minimize the difference between the most and least **leadership shifts** (SL, PL, PSG) any soldier works. RTO/MED shifts don't count toward this balance since they're support roles, not leadership reps.
+  2. **Graded balance (secondary):** among schedules that are equally good on leadership balance, further minimize the difference between the most and least **graded SL shifts** any soldier gets, so graded reps land as evenly as possible too.
 
 Use the toggles on the left of the screen to build your custom schedule. 
 
@@ -440,6 +473,11 @@ if generate_clicked:
     platoon_roles = [role_PL, role_PSG, role_RTO, role_MED]
     all_roles = platoon_roles + role_SL
 
+    # Roles that count toward the fairness objective (leadership exposure only).
+    # RTO/MED are deliberately excluded: they're support roles, not leadership reps,
+    # so they shouldn't be traded off against SL/PL/PSG when balancing workload.
+    leadership_roles = [role_PL, role_PSG] + role_SL
+
     # --------------------------------------------------------
     # Model
     # --------------------------------------------------------
@@ -459,6 +497,13 @@ if generate_clicked:
 
     zmax = pulp.LpVariable("zmax", lowBound=0, cat="Integer")
     zmin = pulp.LpVariable("zmin", lowBound=0, cat="Integer")
+
+    # Secondary objective: balance graded SL shifts specifically. This is a
+    # "free" tiebreaker: which 2 of the 4 on-duty SLs get graded each shift
+    # doesn't change who holds SL/PL/PSG/RTO/MED, so it can't cost anything
+    # against the primary (zmax/zmin) objective above.
+    zmax_g = pulp.LpVariable("zmax_g", lowBound=0, cat="Integer")
+    zmin_g = pulp.LpVariable("zmin_g", lowBound=0, cat="Integer")
 
     # --------------------------------------------------------
     # Coverage
@@ -531,14 +576,39 @@ if generate_clicked:
         model += e_g[p] == 1
 
     # --------------------------------------------------------
-    # Fairness objective
+    # Fairness objective (see FAIRNESS OBJECTIVE note at the top of the file
+    # for the full explanation; this is the implementation of it)
     # --------------------------------------------------------
+    # Tier 1 -- Sp = leadership shifts only (SL graded+ungraded, PL, PSG).
+    # RTO/MED are intentionally excluded here: they still count toward y[p,t]
+    # for rest-rule purposes above, but they're support roles, not leadership
+    # reps, so they shouldn't let the solver "hide" an uneven leadership load
+    # behind an evenly-balanced raw shift count.
     for p in people:
-        Sp = pulp.lpSum(y[p, t] for t in shifts)
+        Sp = pulp.lpSum(x[p, t, r] for t in shifts for r in leadership_roles)
         model += Sp <= zmax
         model += Sp >= zmin
 
-    model += zmax - zmin
+    # Tier 2 -- Gp = graded SL shifts only. RTO/MED can never appear here:
+    # g[p,t] is only ever constrained relative to SL roles (see Grading,
+    # above), so there's nothing to exclude for them; they were never part
+    # of this metric to begin with.
+    for p in people:
+        Gp = pulp.lpSum(g[p, t] for t in shifts)
+        model += Gp <= zmax_g
+        model += Gp >= zmin_g
+
+    # Combine both tiers into one linear objective. EPSILON must be strictly
+    # less than 1/T to guarantee Tier 2 can never outweigh a 1-shift
+    # improvement in Tier 1 (Gp is bounded above by T, so the Tier-2 term's
+    # maximum possible value is EPSILON * T; keeping that under 1 keeps
+    # Tier 1 strictly dominant). T maxes out at 36 given the sidebar's
+    # 12-lane x 3-shift-per-lane cap, so 1/T_max = 1/36 ~= 0.0278.
+    # EPSILON = 0.001 sits comfortably below that for every T the app allows.
+    EPSILON = 0.001
+    model += (zmax - zmin) + EPSILON * (zmax_g - zmin_g)
+
+
 
     solver = pulp.PULP_CBC_CMD(msg=False)
     model.solve(solver)
