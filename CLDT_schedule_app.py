@@ -20,11 +20,13 @@ import requests
 #   • One role per soldier per shift
 #   • No back-to-back shifts except sequencing
 #
-# FAIRNESS OBJECTIVE (two-tier):
-#   The solver optimizes two things, in strict priority order, in a single
-#   solve. It never trades a better tier-1 outcome for a better tier-2 one.
+# FAIRNESS OBJECTIVE (three-tier):
+#   The solver optimizes three things, in strict priority order, in a single
+#   solve. Each tier is a pure tiebreaker among schedules that already tie
+#   on every tier above it -- it never trades a better outcome on a higher
+#   tier for a better outcome on a lower one.
 #
-#   Tier 1 (primary):   minimize max-min spread of Sp = leadership shifts
+#   Tier 1 (primary):    minimize max-min spread of Sp = leadership shifts
 #                        per soldier, where leadership shifts = SL (graded
 #                        + ungraded) + PL + PSG. RTO/MED are deliberately
 #                        excluded from Sp: they're support roles, not
@@ -37,21 +39,40 @@ import requests
 #
 #   Tier 2 (secondary):  among schedules that tie on Tier 1, minimize
 #                        max-min spread of Gp = graded SL shifts only per
-#                        soldier. This is a "free" tiebreaker: which 2 of
-#                        the 4 on-duty SLs get graded each shift doesn't
-#                        change who holds SL/PL/PSG/RTO/MED, so improving
-#                        it can never cost anything against Tier 1.
+#                        soldier. This is a "free" tiebreaker in the sense
+#                        that it can never cost anything against Tier 1:
+#                        which 2 of the 4 on-duty SLs get graded each shift
+#                        doesn't change who holds SL/PL/PSG/RTO/MED.
 #
-#   Mechanism: both tiers are folded into one linear objective,
-#   (zmax - zmin) + EPSILON * (zmax_g - zmin_g), with EPSILON set well
-#   below 1/T_max so Tier 2 can never outweigh even a 1-shift improvement
-#   in Tier 1. See the "Fairness objective" section below for the exact
-#   bound. This avoids a second model.solve() call (the alternative,
-#   equivalent approach: solve Tier 1 alone, lock its optimal value as a
-#   constraint, then solve Tier 2 alone).
+#   Tier 3 (tertiary):   among schedules that tie on Tier 1 AND Tier 2,
+#                        minimize max-min spread of PPp = PL + PSG shifts
+#                        only per soldier. Unlike Tier 2, this is NOT
+#                        guaranteed to find room to improve anything: PL
+#                        and PSG assignments are already counted in Sp
+#                        (Tier 1), so if the Tier-1/Tier-2-optimal solution
+#                        happens to be unique in who holds PL/PSG, Tier 3
+#                        has nothing left to work with. It's "free" only in
+#                        the sense that it can never make Tier 1 or Tier 2
+#                        worse -- not that it's guaranteed to help.
+#
+#   Mechanism: all three tiers are folded into one linear objective,
+#   (zmax - zmin) + EPSILON_TIER2 * (zmax_g - zmin_g)
+#              + EPSILON_TIER3 * (zmax_pp - zmin_pp),
+#   solved in a single model.solve() call -- not three separate solves.
+#   Each epsilon must be small enough that its tier can never outweigh a
+#   1-shift improvement in the tier above it:
+#     EPSILON_TIER2 * T_max < 1
+#     EPSILON_TIER3 * T_max < EPSILON_TIER2
+#   See the "Fairness objective" section below for the exact values and
+#   the arithmetic behind them. The alternative, equivalent approach would
+#   be a true lexicographic solve (solve Tier 1 alone, lock its optimal
+#   value as a constraint, solve Tier 2 alone, lock that in, solve Tier 3
+#   alone) -- that requires 3 separate model.solve() calls; the epsilon
+#   approach here gets the same guaranteed priority ordering in 1.
 #
 # Solver will NOT run if configuration is infeasible.
 # ============================================================
+
 
 
 
@@ -84,19 +105,20 @@ st.title("CLDT Leadership Schedule Builder")
 st.info("""
 This tool builds a **CLDT leadership schedule** for a single Platoon.
 
-**Most users will prefer the **Default Lane Scheme** which is nested within the guidance provided by USMA DMI for CST 2026.**
-
 This model assumes:
 - Each shift (also known as a 'look') includes 1 graded PL, 1 graded PSG, 2 graded SLs, 2 ungraded SLs, 1 ungraded RTO, and 1 ungraded Medic.
 - No back to back shifts, except RTO/MED-> PL/PSG
 - Each soldier gets at least one graded SL shift
 - Each soldier gets at least one PL or PSG shift
 
-- Solver is optimizing for two things, in strict priority order:
+- Solver is optimizing for three things, in strict priority order:
   1. **Leadership balance (primary):** minimize the difference between the most and least **leadership shifts** (SL, PL, PSG) any soldier works. RTO/MED shifts don't count toward this balance since they're support roles, not leadership reps.
   2. **Graded balance (secondary):** among schedules that are equally good on leadership balance, further minimize the difference between the most and least **graded SL shifts** any soldier gets, so graded reps land as evenly as possible too.
+  3. **PL/PSG balance (tertiary):** among schedules that are equally good on both of the above, further minimize the difference between the most and least **PL/PSG shifts** any soldier gets.
 
 Use the toggles on the left of the screen to build your custom schedule. 
+
+Most users will prefer the **Default Lane Scheme** which is nested within the guidance provided by USMA DMI for CST 2026.
 
 Then click **Generate Schedule** and you will receive a report as well as an option to download a .csv file. 
 
@@ -498,12 +520,20 @@ if generate_clicked:
     zmax = pulp.LpVariable("zmax", lowBound=0, cat="Integer")
     zmin = pulp.LpVariable("zmin", lowBound=0, cat="Integer")
 
-    # Secondary objective: balance graded SL shifts specifically. This is a
+    # Tier 2: balance graded SL shifts specifically. This is a genuinely
     # "free" tiebreaker: which 2 of the 4 on-duty SLs get graded each shift
     # doesn't change who holds SL/PL/PSG/RTO/MED, so it can't cost anything
-    # against the primary (zmax/zmin) objective above.
+    # against the Tier 1 (zmax/zmin) objective above.
     zmax_g = pulp.LpVariable("zmax_g", lowBound=0, cat="Integer")
     zmin_g = pulp.LpVariable("zmin_g", lowBound=0, cat="Integer")
+
+    # Tier 3: balance PL+PSG shifts specifically. Unlike Tier 2, this is
+    # NOT guaranteed to find room to improve anything -- PL/PSG identity is
+    # already part of Sp (Tier 1), so if the Tier-1/Tier-2-optimal solution
+    # is unique in who holds PL/PSG, this tier has nothing to work with. It
+    # can only ever help or do nothing, never hurt Tiers 1 or 2.
+    zmax_pp = pulp.LpVariable("zmax_pp", lowBound=0, cat="Integer")
+    zmin_pp = pulp.LpVariable("zmin_pp", lowBound=0, cat="Integer")
 
     # --------------------------------------------------------
     # Coverage
@@ -598,15 +628,34 @@ if generate_clicked:
         model += Gp <= zmax_g
         model += Gp >= zmin_g
 
-    # Combine both tiers into one linear objective. EPSILON must be strictly
-    # less than 1/T to guarantee Tier 2 can never outweigh a 1-shift
-    # improvement in Tier 1 (Gp is bounded above by T, so the Tier-2 term's
-    # maximum possible value is EPSILON * T; keeping that under 1 keeps
-    # Tier 1 strictly dominant). T maxes out at 36 given the sidebar's
-    # 12-lane x 3-shift-per-lane cap, so 1/T_max = 1/36 ~= 0.0278.
-    # EPSILON = 0.001 sits comfortably below that for every T the app allows.
-    EPSILON = 0.001
-    model += (zmax - zmin) + EPSILON * (zmax_g - zmin_g)
+    # Tier 3 -- PPp = PL + PSG shifts only. This is the other half of
+    # "Total Graded Leadership Shifts" that Tier 2 doesn't touch: Tier 2
+    # only balances the graded-SL slice, so a soldier who happens to be
+    # high on both graded SL AND PL/PSG can still end up with a higher
+    # combined total than a soldier who's low on both. Tier 3 targets that
+    # remaining slice specifically. Not guaranteed to move anything (see
+    # header note), but can never make Tiers 1 or 2 worse.
+    for p in people:
+        PPp = pulp.lpSum(x[p, t, role_PL] + x[p, t, role_PSG] for t in shifts)
+        model += PPp <= zmax_pp
+        model += PPp >= zmin_pp
+
+    # Combine all three tiers into one linear objective, solved in a single
+    # model.solve() call. Each epsilon must be strictly small enough that
+    # its tier can never outweigh a 1-shift improvement in the tier above:
+    #   EPSILON_TIER2 * T_max < 1
+    #   EPSILON_TIER3 * T_max < EPSILON_TIER2
+    # T maxes out at 36 given the sidebar's 12-lane x 3-shift-per-lane cap,
+    # so 1/T_max ~= 0.0278 and EPSILON_TIER2/T_max ~= 0.0000278.
+    #   EPSILON_TIER2 = 0.001    (0.001 * 36 = 0.036   < 1)        -> Tier 2 can never outweigh Tier 1
+    #   EPSILON_TIER3 = 0.00001  (0.00001 * 36 = 0.00036 < 0.001)  -> Tier 3 can never outweigh Tier 2
+    EPSILON_TIER2 = 0.001
+    EPSILON_TIER3 = 0.00001
+    model += (
+        (zmax - zmin)
+        + EPSILON_TIER2 * (zmax_g - zmin_g)
+        + EPSILON_TIER3 * (zmax_pp - zmin_pp)
+    )
 
 
 
