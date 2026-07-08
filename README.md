@@ -6,11 +6,11 @@ A web-based application for generating optimal leadership rotation schedules for
 
 ## Features
 
-- **Smart Optimization**: Uses mixed integer linear programming to minimize shift inequality across soldiers
+- **Smart Optimization**: Uses mixed integer linear programming, with a two-tier fairness objective, to minimize shift inequality across soldiers
 - **Flexible Configuration**:
   - Variable squad sizes (6-13 soldiers per squad, 4 squads)
   - Adjustable lane and shift counts, or a built-in DMI CST 2026 default scheme
-- **Fair Distribution**: Minimizes the gap between the most-worked and least-worked soldiers
+- **Fair Distribution**: Balances leadership shifts (SL, PL, PSG) across soldiers first, then further balances graded SL shifts specifically among equally-good options. RTO/MED shifts don't count toward either balance, since they're support roles, not leadership reps.
 - **Guaranteed Exposure**: Every soldier gets at least one PL/PSG shift and one graded SL shift
 - **Professional Output**: On-screen leadership load summaries plus a CSV export
 - **Usage Analytics**: Anonymous generation counter logged via a Google Apps Script endpoint
@@ -93,7 +93,7 @@ The app provides:
 - No back-to-back shifts for the same soldier, except that an RTO shift is always followed by a PL shift the next period, and a MED shift is always followed by a PSG shift the next period, for that same soldier.
 - Squad Leaders are squad-locked: only a member of Squad *s* can serve as SL for Squad *s*.
 - No more than 2 soldiers from the same squad may be pulled into PL, PSG, RTO, MED, or that squad's SL role in the same shift.
-- Objective: minimize the difference between the most-worked and least-worked soldier's total shift count (not a per-role or per-squad balance guarantee).
+- Objective (two-tier, see **Fairness Objective** section below): first minimize the gap between the most- and least-worked soldier's leadership shift count (SL + PL + PSG); then, among equally good options, minimize the gap in graded SL shifts specifically. RTO/MED shifts don't count toward either balance.
 
 ## Feasibility at a Glance (Default CST 2026 Scheme)
 
@@ -119,11 +119,23 @@ pip install --upgrade pip
 pip install -r requirements.txt --no-cache-dir
 ```
 
+## Fairness Objective (How Balancing Works)
+
+The solver optimizes two things, in strict priority order, in a single solve. It never trades a better result on Tier 1 for a better result on Tier 2.
+
+**Tier 1 (primary): balance leadership shifts.** Minimizes the gap between the most- and least-worked soldier's total **leadership shifts** — SL (graded and ungraded combined) + PL + PSG.
+
+**RTO and MED shifts do not count toward this balance.** They're support roles, not leadership reps, so a soldier shouldn't be able to look "fully worked" by racking up RTO/MED shifts while actually getting fewer leadership opportunities than squadmates. (RTO/MED assignments still count for the no-back-to-back rest rule — they're just excluded from the fairness math specifically.)
+
+**Tier 2 (secondary): balance graded SL shifts.** Among all schedules that are equally good on Tier 1, the solver further minimizes the gap between the most- and least-graded soldier's **graded SL shift** count specifically. This is a "free" tiebreaker: which 2 of the 4 on-duty squad leaders get marked graded each shift doesn't change who holds any role, so improving this can never come at the cost of Tier 1 fairness.
+
+**Why two tiers instead of one combined number?** Early versions balanced total shift count (including RTO/MED) as a single number. That could leave some soldiers with 2 graded SL shifts and others with 4, all while looking perfectly "balanced" on paper, because RTO/MED shifts and leadership shifts were treated as interchangeable. Splitting leadership out from support roles, and then splitting graded exposure out from leadership as a second-priority goal, targets what actually matters for training value instead of just raw shift count.
+
 ## Technical Details
 
 - **Optimization Engine**: PuLP (Python Linear Programming)
 - **Solver**: CBC (Coin-or Branch and Cut)
-- **Objective**: Minimize the max-min difference in total (SL + PL + PSG) shifts across all soldiers
+- **Objective**: Two-tier minimax. Tier 1 minimizes the max-min gap in leadership shifts (SL + PL + PSG, excluding RTO/MED) per soldier. Tier 2, subordinate to Tier 1, minimizes the max-min gap in graded SL shifts per soldier. Both are combined into one linear objective using a small weighting factor on Tier 2, chosen so it can never outweigh even a 1-shift improvement in Tier 1.
 - **Framework**: Streamlit for the web interface
 - **Analytics**: Anonymous generation-count logging via a Google Apps Script web endpoint (timestamp only; no roster or platoon data is transmitted)
 
