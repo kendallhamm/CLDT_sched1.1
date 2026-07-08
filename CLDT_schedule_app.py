@@ -101,6 +101,19 @@ A schedule can be generated ONLY if all of the following conditions are met.
 3) nₛ × ⌈T / 2⌉ ≥ T
 4) nₛ × ⌈T / 3⌉ ≥ T
 
+**With the default DMI CST 2026 lane scheme (8 lanes, shifts = [2,3,3,3,3,3,3,1], T = 21 total shifts):**
+
+⌈T/2⌉ = 11 and ⌈T/3⌉ = 7, so the conditions above become:
+
+| # | Condition (general) | Condition (T = 21) | Plain meaning |
+|---|---|---|---|
+| 1 | P × ⌈T/2⌉ ≥ 8T | P × 11 ≥ 168 → **P ≥ 16** | Never binding here since minimum PLT size (4 squads × 6) is 24 |
+| 2 | 2T ≥ P | 42 ≥ P → **P ≤ 42** | The real limit: total soldiers in the platoon can't exceed 42 |
+| 3 | nₛ × ⌈T/2⌉ ≥ T | nₛ × 11 ≥ 21 → **nₛ ≥ 2** | Never binding here since minimum squad size is 6 |
+| 4 | nₛ × ⌈T/3⌉ ≥ T | nₛ × 7 ≥ 21 → **nₛ ≥ 3** | Never binding here since minimum squad size is 6 |
+
+**In practice, for the CST 2026 default scheme, Condition 2 (P ≤ 42) is the only one that can actually fail.** Squad sizes are capped at 6-13 each, so total PLT size (P) can range from 24 to 52. If your four squad sizes add up to more than 42 soldiers, the schedule will be infeasible under this lane scheme, even though Conditions 1, 3, and 4 are satisfied automatically.
+
 These conditions are more detailed below if you have additional questions.
 
 
@@ -132,6 +145,8 @@ $$
 
 If this condition fails, there are not enough soldiers to staff all shifts.
 
+*CST 2026 default scheme (T = 21): P × 11 ≥ 168, i.e. P ≥ 16. With squad sizes capped at 6-13, the smallest possible platoon (24) already clears this, so this condition will not fail under the default scheme.*
+
 ---
 
 #### 2️⃣ Graded shift requirement
@@ -150,6 +165,8 @@ $$
 
 If this condition fails, there are not enough leadership opportunities for everyone.
 
+*CST 2026 default scheme (T = 21): 42 ≥ P. This is the condition most likely to fail: if your four squad sizes sum to more than 42 soldiers, the schedule is infeasible under this lane scheme regardless of squad-by-squad sizing.*
+
 ---
 
 #### 3️⃣ Squad integrity- SL leads his/her own squad, only
@@ -165,6 +182,8 @@ n_s \cdot \left\lceil \frac{T}{2} \right\rceil \ge T
 $$
 
 If any squad fails this condition, it cannot sustain SL coverage across all shifts.
+
+*CST 2026 default scheme (T = 21): nₛ × 11 ≥ 21, i.e. nₛ ≥ 2. Since squad size minimum is 6, this cannot fail under the default scheme.*
 
 ---
 
@@ -186,13 +205,14 @@ $$
 
 If this condition fails, sequencing forces overloads and no valid schedule exists.
 
+*CST 2026 default scheme (T = 21): nₛ × 7 ≥ 21, i.e. nₛ ≥ 3. Since squad size minimum is 6, this cannot fail under the default scheme.*
+
 ---
 
 #### 5️⃣ Squad min-force: pull no more than 2 soldiers per squad for platoon level taskings
 
 To preserve unit integrity:
-- **No more than 2 soldiers per squad per shift** may serve as  
-  PL, PSG, RTO, or MED.
+- **No more than 2 soldiers per squad per shift** may serve in a platoon-level or squad-leader role: PL, PSG, RTO, MED, or that squad's SL.
 
 $$
 \sum_{p \in s}
@@ -200,16 +220,17 @@ $$
 x_{p,t,\text{PL}} +
 x_{p,t,\text{PSG}} +
 x_{p,t,\text{RTO}} +
-x_{p,t,\text{MED}}
+x_{p,t,\text{MED}} +
+x_{p,t,\text{SL}_s}
 \big)
 \le 2
 \quad \forall s,t
 $$
 
+This cap is fixed at 2 regardless of T or squad size, and is enforced directly by the solver (not merely implied by Conditions 3 and 4). Because every squad already provides exactly one SL every shift, this leaves room for at most 1 additional platoon-level role (PL, PSG, RTO, or MED) to be pulled from that squad in the same shift.
+
 If squad sizes are too small relative to \( T \), this limit prevents platoon-level
 roles from being filled legally.
-
-(This constraint is enforced implicitly by Conditions 3 and 4.)
 
 ---
 
@@ -466,7 +487,6 @@ if generate_clicked:
         for t in shifts:
             model += pulp.lpSum(x[p, t, r] for r in all_roles) == y[p, t]
 
-    # Squad pull cap
     # Squad pull cap (includes Squad Leader)
     for t in shifts:
         for s_idx in range(S):
@@ -628,12 +648,6 @@ if generate_clicked:
     # Build schedule dataframe
     df_schedule = pd.DataFrame(rows, columns=["Soldier"] + shift_labels)
 
-    # Build schedule dataframe
-    df_schedule = pd.DataFrame(rows, columns=["Soldier"] + shift_labels)
-
-    # Build schedule dataframe
-    df_schedule = pd.DataFrame(rows, columns=["Soldier"] + shift_labels)
-
     # Create 5 blank spacer columns
     df_spacer = pd.DataFrame(
         [[""] * 5 for _ in range(len(df_schedule))],
@@ -654,7 +668,7 @@ if generate_clicked:
 
     df_summary = pd.DataFrame(summary_rows, columns=summary_columns)
 
-    # Combine schedule + spacer + summagitry
+    # Combine schedule + spacer + summary
     df_final = pd.concat([df_schedule, df_spacer, df_summary], axis=1)
 
     buf = io.StringIO()
