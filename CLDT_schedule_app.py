@@ -84,6 +84,8 @@ st.title("CLDT Leadership Schedule Builder")
 st.info("""
 This tool builds a **CLDT leadership schedule** for a single Platoon.
 
+**Most users will prefer the **Default Lane Scheme** which is nested within the guidance provided by USMA DMI for CST 2026.**
+
 This model assumes:
 - Each shift (also known as a 'look') includes 1 graded PL, 1 graded PSG, 2 graded SLs, 2 ungraded SLs, 1 ungraded RTO, and 1 ungraded Medic.
 - No back to back shifts, except RTO/MED-> PL/PSG
@@ -95,8 +97,6 @@ This model assumes:
   2. **Graded balance (secondary):** among schedules that are equally good on leadership balance, further minimize the difference between the most and least **graded SL shifts** any soldier gets, so graded reps land as evenly as possible too.
 
 Use the toggles on the left of the screen to build your custom schedule. 
-
-Most users will prefer the **Default Lane Scheme** which is nested within the guidance provided by USMA DMI for CST 2026.
 
 Then click **Generate Schedule** and you will receive a report as well as an option to download a .csv file. 
 
